@@ -357,8 +357,7 @@ def test_computer_total_excludes_idle_and_keeps_current_status(client, app):
         day = get_local_today() - timedelta(days=1)
         common = {
             "record_date": day,
-            "started_at": datetime.now(timezone.utc),
-            "ended_at": datetime.now(timezone.utc),
+            "started_at": datetime.combine(day, datetime.min.time(), tzinfo=timezone.utc),
             "executable_name": "test.exe",
             "friendly_name": "Teste",
             "category": "other",
@@ -370,16 +369,19 @@ def test_computer_total_excludes_idle_and_keeps_current_status(client, app):
                 ComputerActivityBlock(
                     **common,
                     duration_seconds=100,
+                    ended_at=common["started_at"] + timedelta(seconds=100),
                     classification="productive",
                 ),
                 ComputerActivityBlock(
                     **common,
                     duration_seconds=200,
+                    ended_at=common["started_at"] + timedelta(seconds=200),
                     classification="distracting",
                 ),
                 ComputerActivityBlock(
                     **common,
                     duration_seconds=300,
+                    ended_at=common["started_at"] + timedelta(seconds=300),
                     classification="neutral",
                 ),
                 ComputerActivityBlock(
@@ -391,6 +393,7 @@ def test_computer_total_excludes_idle_and_keeps_current_status(client, app):
                         "classification_source": "fallback",
                     },
                     duration_seconds=400,
+                    ended_at=common["started_at"] + timedelta(seconds=400),
                     classification="neutral",
                 ),
             ]

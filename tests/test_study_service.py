@@ -157,7 +157,10 @@ def test_monthly_heatmap_levels(app):
     assert heatmap["days"][26]["is_highlighted"] is True
 
 
-def test_study_page_loads_without_records(client):
+def test_study_page_loads_without_records(client, monkeypatch):
+    monkeypatch.setattr("app.routes.get_local_today", lambda: REFERENCE_DATE)
+    monkeypatch.setattr("app.services.study_service.get_local_today", lambda: REFERENCE_DATE)
+    monkeypatch.setattr("app.services.analytics_utils.get_local_today", lambda: REFERENCE_DATE)
     response = client.get("/estudo")
 
     assert response.status_code == 200
