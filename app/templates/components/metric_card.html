@@ -1,0 +1,30 @@
+{% macro metric_card(
+  title,
+  value,
+  helper,
+  icon,
+  tone="blue",
+  class_name="",
+  label="Visão geral",
+  helper_tone="neutral",
+  secondary_helper=""
+) %}
+  <article class="card metric-card {{ class_name }}">
+    <header class="metric-card-header">
+      <div>
+        {% if label %}<p class="card-label">{{ label }}</p>{% endif %}
+        <h2 class="card-title">{{ title }}</h2>
+      </div>
+      <span class="icon-badge icon-badge--{{ tone }}" aria-hidden="true">
+        <i data-lucide="{{ icon }}"></i>
+      </span>
+    </header>
+    <div class="metric-card-body">
+      <strong class="metric-value">{{ value }}</strong>
+      <p class="metric-helper metric-helper--{{ helper_tone }}">{{ helper }}</p>
+      {% if secondary_helper %}
+        <p class="metric-secondary-helper">{{ secondary_helper }}</p>
+      {% endif %}
+    </div>
+  </article>
+{% endmacro %}

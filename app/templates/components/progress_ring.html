@@ -1,0 +1,24 @@
+{% macro progress_ring(value, label="Progresso") %}
+  <div
+    class="progress-ring"
+    role="img"
+    aria-label="{{ label }}: {{ value }}%"
+  >
+    <svg viewBox="0 0 120 120" aria-hidden="true">
+      <circle class="progress-ring-track" cx="60" cy="60" r="50"></circle>
+      <circle
+        class="progress-ring-value"
+        cx="60"
+        cy="60"
+        r="50"
+        pathLength="100"
+        stroke-dasharray="{{ value }} {{ 100 - value }}"
+      ></circle>
+    </svg>
+    <span class="progress-ring-label">
+      <strong>{{ value }}</strong>
+      <small>%</small>
+    </span>
+  </div>
+{% endmacro %}
+

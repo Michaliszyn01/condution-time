@@ -1,0 +1,9 @@
+{% macro icon_badge(icon, tone="blue", label="") %}
+  <span
+    class="icon-badge icon-badge--{{ tone }}"
+    {% if label %}aria-label="{{ label }}"{% else %}aria-hidden="true"{% endif %}
+  >
+    <i data-lucide="{{ icon }}"></i>
+  </span>
+{% endmacro %}
+

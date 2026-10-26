@@ -1,0 +1,33 @@
+{% from "components/icon_badge.html" import icon_badge %}
+
+{% macro activity_type_selector(types, default_type) %}
+  <fieldset class="session-fieldset" aria-describedby="session-type-error">
+    <legend>Tipo da atividade</legend>
+    <p class="session-field-hint">Escolha a atividade que melhor representa seu foco.</p>
+
+    <div class="activity-type-options">
+      {% for type in types %}
+        <label class="activity-type-option">
+          <input
+            class="session-visually-hidden"
+            type="radio"
+            name="session_type"
+            value="{{ type.value }}"
+            data-label="{{ type.label }}"
+            data-category="{{ type.category }}"
+            data-category-label="{{ type.category_label }}"
+            data-icon="{{ type.icon }}"
+            {% if type.value == default_type %}checked{% endif %}
+          >
+          {{ icon_badge(type.icon, "blue") }}
+          <strong>{{ type.label }}</strong>
+          <i class="activity-type-check" data-lucide="check" aria-hidden="true"></i>
+        </label>
+      {% endfor %}
+    </div>
+
+    <p class="session-field-error" id="session-type-error" hidden>
+      Selecione um tipo de atividade.
+    </p>
+  </fieldset>
+{% endmacro %}

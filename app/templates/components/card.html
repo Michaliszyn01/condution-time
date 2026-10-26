@@ -1,0 +1,24 @@
+{% macro card(title="", description="", icon="", icon_tone="blue", class_name="", label="") %}
+  <article class="card {{ class_name }}">
+    {% if title or icon or label %}
+      <header class="card-header">
+        <div class="card-heading">
+          {% if icon %}
+            <span class="icon-badge icon-badge--{{ icon_tone }}" aria-hidden="true">
+              <i data-lucide="{{ icon }}"></i>
+            </span>
+          {% endif %}
+          <div>
+            {% if label %}<p class="card-label">{{ label }}</p>{% endif %}
+            {% if title %}<h2 class="card-title">{{ title }}</h2>{% endif %}
+            {% if description %}<p class="card-description">{{ description }}</p>{% endif %}
+          </div>
+        </div>
+      </header>
+    {% endif %}
+    <div class="card-content">
+      {{ caller() }}
+    </div>
+  </article>
+{% endmacro %}
+

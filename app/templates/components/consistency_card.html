@@ -1,0 +1,46 @@
+{% macro consistency_card(consistency) %}
+  <article class="card consistency-card grid-span-6">
+    <header class="consistency-header">
+      <div class="card-heading">
+        <span class="icon-badge icon-badge--orange" aria-hidden="true">
+          <i data-lucide="flame"></i>
+        </span>
+        <div>
+          <p class="card-label">Últimos 7 dias</p>
+          <h2 class="card-title">Consistência</h2>
+        </div>
+      </div>
+    </header>
+
+    <div class="consistency-content">
+      <div class="consistency-copy">
+        <p class="consistency-value">
+          <strong>{{ consistency.days }}</strong>
+          <span>dias</span>
+        </p>
+        <span>{{ consistency.period }}</span>
+        <p class="consistency-message">{{ consistency.message }}</p>
+      </div>
+
+      <div
+        class="week-preview"
+        aria-label="{{ consistency.days }} dias consistentes nos últimos 7 dias"
+        title="{{ consistency.rule }}"
+      >
+        {% for day in consistency.weekdays %}
+          <span
+            class="day-dot{% if day.is_consistent %} is-highlighted{% endif %}"
+            title="{{ day.title }}"
+          >
+            <span aria-hidden="true">
+              {% if day.is_consistent %}
+                <i data-lucide="check"></i>
+              {% endif %}
+            </span>
+            <small>{{ day.label }}</small>
+          </span>
+        {% endfor %}
+      </div>
+    </div>
+  </article>
+{% endmacro %}

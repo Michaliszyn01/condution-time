@@ -1,0 +1,35 @@
+{% from "components/session_controls.html" import session_controls %}
+
+{% macro session_timer() %}
+  <article class="card session-timer-card grid-span-7">
+    <header class="session-timer-header">
+      <div>
+        <p class="card-label">Foco atual</p>
+        <h2 data-running-title>Sessão em andamento</h2>
+      </div>
+      <span class="badge badge--positive" data-running-category>Estudo</span>
+    </header>
+
+    <div class="session-timer-ring" role="timer" aria-live="off" aria-label="Tempo decorrido">
+      <svg viewBox="0 0 260 260" aria-hidden="true">
+        <circle class="session-timer-track" cx="130" cy="130" r="110"></circle>
+        <circle
+          class="session-timer-progress"
+          cx="130"
+          cy="130"
+          r="110"
+          pathLength="100"
+          stroke-dasharray="100"
+          stroke-dashoffset="100"
+        ></circle>
+      </svg>
+      <div class="session-timer-value">
+        <time datetime="PT0S" data-timer-display>00:00</time>
+        <span>de <strong data-running-duration>50</strong> minutos</span>
+      </div>
+    </div>
+
+    <p class="session-progress-copy" data-progress-copy>0 de 50 minutos</p>
+    {{ session_controls() }}
+  </article>
+{% endmacro %}

@@ -1,0 +1,46 @@
+{% from "components/progress_ring.html" import progress_ring %}
+
+{% macro score_card(
+  score,
+  title="Pontuação de hoje",
+  label="Visão geral",
+  class_name="grid-span-6"
+) %}
+  <article class="card score-card {{ class_name }}">
+    <div class="score-card-copy">
+      <header>
+        <p class="card-label">{{ label }}</p>
+        <h2 class="card-title">{{ title }}</h2>
+      </header>
+
+      <div class="score-value-row">
+        <strong class="score-value">{{ score.value }}</strong>
+        <span class="score-unit">pts</span>
+      </div>
+
+      <div class="score-context">
+        <span class="score-comparison score-comparison--{{ score.comparison_tone|default('positive') }}">
+          <i data-lucide="{{ score.comparison_icon|default('trending-up') }}" aria-hidden="true"></i>
+          {{ score.comparison }}
+        </span>
+        <p>{{ score.helper }}</p>
+      </div>
+
+      {% if score.base is defined %}
+        <div class="score-details" aria-label="Detalhamento da pontuação">
+          <span>{{ score.coverage_note }}</span>
+          <span>Bônus de sessão: <strong>+{{ score.bonus }}</strong></span>
+          <span>{{ score.coverage }}</span>
+          <span>{{ score.coverage_comparison }}</span>
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="score-ring-wrap">
+      {{ progress_ring(score.ring_value|default(score.value), "Base normalizada") }}
+      {% if score.bonus is defined %}
+        <span class="score-bonus-badge">+{{ score.bonus }} bônus</span>
+      {% endif %}
+    </div>
+  </article>
+{% endmacro %}

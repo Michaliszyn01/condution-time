@@ -1,0 +1,46 @@
+{% macro stacked_chart_card(weekly_usage, class_name="") %}
+  <article class="card computer-stacked-card {{ class_name }}">
+    <header class="section-card-header">
+      <div>
+        <p class="card-label">Evolução</p>
+        <h2 class="card-title">{{ weekly_usage.title }}</h2>
+      </div>
+      <span class="visual-filter">
+        <i data-lucide="calendar-range" aria-hidden="true"></i>
+        {{ weekly_usage.filter }}
+      </span>
+    </header>
+
+    <div class="computer-chart-legend" aria-label="Legenda do gráfico">
+      <span><i class="is-productive" aria-hidden="true"></i>Produtivo</span>
+      <span><i class="is-distracted" aria-hidden="true"></i>Distração</span>
+    </div>
+
+    <div
+      class="computer-chart-wrap computer-local-chart"
+      role="img"
+      aria-label="Tempo produtivo e distraído nos últimos sete dias"
+    >
+      {% for label in weekly_usage.labels %}
+        {% set productive = weekly_usage.productive[loop.index0] %}
+        {% set distracted = weekly_usage.distracted[loop.index0] %}
+        <div
+          class="computer-local-column"
+          title="{{ label }}: {{ productive }}h produtivo, {{ distracted }}h distração"
+        >
+          <div class="computer-local-stack">
+            <span
+              class="is-distracted"
+              style="height: {{ [distracted * 12, 100]|min }}%"
+            ></span>
+            <span
+              class="is-productive"
+              style="height: {{ [productive * 12, 100]|min }}%"
+            ></span>
+          </div>
+          <strong>{{ label }}</strong>
+        </div>
+      {% endfor %}
+    </div>
+  </article>
+{% endmacro %}

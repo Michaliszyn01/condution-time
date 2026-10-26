@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% from "components/score_card.html" import score_card %}
+{% from "components/metric_card.html" import metric_card %}
+{% from "components/list_card.html" import list_card %}
+{% from "components/weekly_chart_card.html" import weekly_chart_card %}
+{% from "components/progress_list.html" import progress_list %}
+{% from "components/action_card.html" import action_card %}
+{% from "components/heatmap_calendar.html" import heatmap_calendar %}
+{% from "components/date_navigation.html" import render_date_navigation %}
+
+{% block title %}Treino{% endblock %}
+
+{% block page_styles %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/study.css') }}">
+{% endblock %}
+
+{% block content %}
+  {{ render_date_navigation(date_navigation) }}
+  <section class="dashboard-grid study-dashboard" aria-label="Painel de treinos">
+    {{ score_card(
+      training_data.score,
+      "Pontuação de treino",
+      "Visão geral",
+      "grid-span-4 study-score-card"
+    ) }}
+
+    <section class="study-metrics-grid grid-span-8" aria-label="Métricas de treino">
+      {% for metric in training_data.metrics %}
+        {{ metric_card(
+          metric.title,
+          metric.value,
+          metric.helper,
+          metric.icon,
+          metric.theme,
+          "study-metric-card",
+          "",
+          metric.helper_tone
+        ) }}
+      {% endfor %}
+    </section>
+
+    {{ list_card(
+      "Sessões recentes",
+      training_data.sessions,
+      "Ver todas as sessões",
+      "grid-span-3 study-detail-card",
+      url_for("main.historico", categoria="training"),
+      training_data.sessions_empty
+    ) }}
+
+    {{ weekly_chart_card(
+      training_data.weekly,
+      "grid-span-5 study-detail-card"
+    ) }}
+
+    {{ progress_list(
+      "Distribuição por modalidade",
+      training_data.areas,
+      "Ver todas as métricas",
+      "grid-span-4 study-detail-card",
+      training_data.areas_empty
+    ) }}
+
+    {{ action_card(
+      url_for("main.sessao"),
+      "#",
+      training_data.next_training.title,
+      training_data.next_training.subtitle,
+      "Planejamento",
+      "calendar-clock",
+      "grid-span-6 study-action-card",
+      "Iniciar treino",
+      "Ver plano de treinos",
+      training_data.next_training,
+      training_data.next_training.status
+    ) }}
+
+    {{ heatmap_calendar(
+      training_data.heatmap,
+      "grid-span-6",
+      "Mapa de treinos",
+      "treinos"
+    ) }}
+  </section>
+{% endblock %}
+
+{% block page_scripts %}
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <script src="{{ url_for('static', filename='js/study.js') }}"></script>
+{% endblock %}

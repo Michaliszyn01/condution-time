@@ -1,0 +1,54 @@
+{% macro registration_summary() %}
+  <section
+    class="registration-success"
+    data-register-success
+    aria-labelledby="registration-success-title"
+    hidden
+  >
+    <article class="card registration-success-card">
+      <span class="registration-success-icon" aria-hidden="true">
+        <i data-lucide="circle-check-big"></i>
+      </span>
+      <p class="card-label" data-success-category>Estudo</p>
+      <h2 id="registration-success-title" data-success-title tabindex="-1">
+        Registro adicionado com sucesso
+      </h2>
+      <p class="registration-success-summary" data-success-summary></p>
+
+      <dl class="registration-success-meta">
+        <div>
+          <dt>Categoria</dt>
+          <dd data-success-category-meta>Estudo</dd>
+        </div>
+        <div>
+          <dt>Registrado às</dt>
+          <dd data-success-time>--:--</dd>
+        </div>
+      </dl>
+
+      <p class="registration-future-note">
+        Este registro será usado futuramente na pontuação do seu dia.
+        <strong>Nenhum ponto real foi calculado.</strong>
+      </p>
+
+      <div class="registration-success-actions">
+        <button class="button button--primary" type="button" data-register-another>
+          <i data-lucide="plus" aria-hidden="true"></i>
+          <span>Adicionar outro registro</span>
+        </button>
+        <a class="button button--secondary" href="{{ url_for('main.home') }}">
+          Voltar para o início
+        </a>
+        <a class="registration-category-link" href="#" data-success-category-link>
+          Ver categoria
+          <i data-lucide="arrow-right" aria-hidden="true"></i>
+        </a>
+      </div>
+    </article>
+  </section>
+
+  <div class="registration-toast" role="status" aria-live="polite" data-register-toast hidden>
+    <i data-lucide="circle-check" aria-hidden="true"></i>
+    <span>Registro adicionado localmente.</span>
+  </div>
+{% endmacro %}

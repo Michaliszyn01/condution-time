@@ -1,0 +1,22 @@
+{% macro point_breakdown() %}
+  <article class="card point-breakdown-card grid-span-7">
+    <header class="section-card-header">
+      <div>
+        <p class="card-label">Pontuação oficial</p>
+        <h2 class="card-title">Como os pontos foram calculados</h2>
+      </div>
+      <span class="badge badge--positive" data-point-total-badge>0 / 5 pts</span>
+    </header>
+
+    <ul class="point-breakdown-list" data-point-breakdown>
+      <li class="point-breakdown-total">
+        <span>Total</span>
+        <strong>0 / 5 pts</strong>
+      </li>
+    </ul>
+
+    <p class="session-simulation-note">
+      O bônus é calculado pelo sistema oficial e pode aumentar após o registro do resumo.
+    </p>
+  </article>
+{% endmacro %}

@@ -1,0 +1,38 @@
+{% from "components/progress_bar.html" import progress_bar %}
+
+{% macro progress_list(title, items, link_label, class_name="", empty_text="") %}
+  <article class="card progress-list-card {{ class_name }}">
+    <header class="section-card-header">
+      <div>
+        <p class="card-label">Distribuição</p>
+        <h2 class="card-title">{{ title }}</h2>
+      </div>
+    </header>
+
+    <ul class="subject-progress-list">
+      {% for item in items %}
+        <li>
+          <div class="subject-progress-heading">
+            <span>{{ item.name }}</span>
+            <strong>{{ item.value|default(item.score ~ " pts") }}</strong>
+          </div>
+          {{ progress_bar(
+            item.score,
+            100,
+            item.theme,
+            item.bar_label|default("Pontuação de " ~ item.name)
+          ) }}
+        </li>
+      {% endfor %}
+    </ul>
+
+    {% if not items and empty_text %}
+      <p class="study-inline-empty">{{ empty_text }}</p>
+    {% endif %}
+
+    <a class="card-link" href="#">
+      {{ link_label }}
+      <i data-lucide="arrow-right" aria-hidden="true"></i>
+    </a>
+  </article>
+{% endmacro %}

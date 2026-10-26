@@ -1,0 +1,30 @@
+{% from "components/icon_badge.html" import icon_badge %}
+
+{% macro registration_category_selector(categories) %}
+  <div class="registration-category-grid">
+    {% for category in categories %}
+      <button
+        class="card registration-category-card theme-{{ category.theme }}"
+        type="button"
+        data-register-category="{{ category.value }}"
+        data-category-label="{{ category.label }}"
+        data-category-icon="{{ category.icon }}"
+        data-category-theme="{{ category.theme }}"
+        data-category-url="{{ url_for(category.endpoint) }}"
+        aria-describedby="register-category-description-{{ category.value }}"
+      >
+        <span class="registration-category-top">
+          {{ icon_badge(category.icon, category.theme) }}
+          <i data-lucide="arrow-up-right" aria-hidden="true"></i>
+        </span>
+        <span class="registration-category-copy">
+          <strong>{{ category.label }}</strong>
+          <span id="register-category-description-{{ category.value }}">
+            {{ category.description }}
+          </span>
+        </span>
+        <span class="badge badge--neutral">{{ category.status }}</span>
+      </button>
+    {% endfor %}
+  </div>
+{% endmacro %}

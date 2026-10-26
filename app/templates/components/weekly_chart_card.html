@@ -1,0 +1,26 @@
+{% macro weekly_chart_card(weekly, class_name="", title="Desempenho semanal") %}
+  <article class="card weekly-chart-card {{ class_name }}">
+    <header class="section-card-header">
+      <div>
+        <p class="card-label">Evolução</p>
+        <h2 class="card-title">{{ title }}</h2>
+      </div>
+      <span class="visual-filter">
+        <i data-lucide="calendar-range" aria-hidden="true"></i>
+        {{ weekly.filter }}
+      </span>
+    </header>
+
+    <div class="weekly-chart-wrap">
+      <canvas
+        id="study-weekly-chart"
+        role="img"
+        aria-label="Pontuações dos últimos sete dias"
+      ></canvas>
+    </div>
+
+    <script id="study-weekly-chart-data" type="application/json">
+      {{ {"labels": weekly.labels, "values": weekly.scores, "details": weekly.details|default([]), "datasets": weekly.datasets|default([])}|tojson }}
+    </script>
+  </article>
+{% endmacro %}

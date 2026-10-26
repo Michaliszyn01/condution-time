@@ -1,0 +1,209 @@
+.study-score-card.theme-purple .progress-ring-value {
+  stroke: var(--purple);
+}
+
+.study-score-card.theme-green .progress-ring-value {
+  stroke: var(--positive);
+}
+
+.metric-secondary-helper {
+  margin-top: -3px;
+  color: var(--text-muted);
+  font-size: 0.64rem;
+  font-weight: 550;
+}
+
+.progress-bar--lilac {
+  --progress-color: #a991ff;
+}
+
+.progress-bar--teal {
+  --progress-color: #27aa9a;
+}
+
+.study-action-card.theme-purple {
+  border-color: #e5ddff;
+  background: #f6f3ff;
+  box-shadow:
+    0 1px 2px rgba(16, 24, 40, 0.02),
+    0 6px 20px rgba(118, 87, 246, 0.06);
+}
+
+.study-action-card.theme-purple .action-card-icon {
+  box-shadow: 0 6px 16px rgba(118, 87, 246, 0.11);
+  color: var(--purple);
+}
+
+.study-action-card.theme-purple .action-card-details em {
+  background: var(--purple-soft);
+  color: var(--purple);
+}
+
+.study-action-card.theme-green {
+  border-color: #d8f0e5;
+  background: #f1faf6;
+  box-shadow:
+    0 1px 2px rgba(16, 24, 40, 0.02),
+    0 6px 20px rgba(34, 181, 115, 0.06);
+}
+
+.study-action-card.theme-green .action-card-icon {
+  box-shadow: 0 6px 16px rgba(34, 181, 115, 0.11);
+  color: var(--positive);
+}
+
+.study-action-card.theme-green .action-card-details em {
+  background: var(--positive-soft);
+  color: #16885a;
+}
+
+.heatmap-card.theme-purple .heatmap-level-0 {
+  background: #f7f5fc;
+}
+
+.heatmap-card.theme-purple .heatmap-level-1 {
+  background: #efebff;
+  color: #6c6385;
+}
+
+.heatmap-card.theme-purple .heatmap-level-2 {
+  background: #ded5ff;
+  color: #5c4e80;
+}
+
+.heatmap-card.theme-purple .heatmap-level-3 {
+  background: #bcaaff;
+  color: #403264;
+}
+
+.heatmap-card.theme-purple .heatmap-level-4 {
+  background: #957dfb;
+  color: #ffffff;
+}
+
+.heatmap-card.theme-purple .heatmap-level-5 {
+  background: var(--purple);
+  color: #ffffff;
+}
+
+.heatmap-card.theme-purple .heatmap-cell.is-highlighted {
+  box-shadow:
+    0 0 0 2px var(--surface-primary),
+    0 0 0 4px rgba(118, 87, 246, 0.3),
+    0 6px 12px rgba(118, 87, 246, 0.16);
+}
+
+.heatmap-card.theme-green .heatmap-level-0 {
+  background: #f3f8f6;
+}
+
+.heatmap-card.theme-green .heatmap-level-1 {
+  background: #e7f6ef;
+  color: #587568;
+}
+
+.heatmap-card.theme-green .heatmap-level-2 {
+  background: #cfecdd;
+  color: #456858;
+}
+
+.heatmap-card.theme-green .heatmap-level-3 {
+  background: #9fd9bc;
+  color: #23523b;
+}
+
+.heatmap-card.theme-green .heatmap-level-4 {
+  background: #62c593;
+  color: #ffffff;
+}
+
+.heatmap-card.theme-green .heatmap-level-5 {
+  background: var(--positive);
+  color: #ffffff;
+}
+
+.heatmap-card.theme-green .heatmap-cell.is-highlighted {
+  box-shadow:
+    0 0 0 2px var(--surface-primary),
+    0 0 0 4px rgba(34, 181, 115, 0.3),
+    0 6px 12px rgba(34, 181, 115, 0.16);
+}
+
+.category-dashboard .detail-list-copy span {
+  line-height: 1.35;
+}
+
+.category-dashboard .action-card-details span {
+  max-width: 100%;
+  line-height: 1.35;
+  white-space: normal;
+}
+
+@media (max-width: 768px) {
+  .metric-secondary-helper {
+    margin-top: 0;
+  }
+}
+.sleep-stage-card {
+  padding: 1.25rem;
+}
+
+.sleep-details-panel {
+  margin-top: var(--grid-gap);
+}
+
+.sleep-details-panel > summary {
+  cursor: pointer;
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+.sleep-session-detail {
+  margin-top: 20px;
+}
+
+.category-dashboard[data-chart-theme="purple"] .subject-progress-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px 20px;
+}
+
+@media (max-width: 680px) {
+  .category-dashboard[data-chart-theme="purple"] .subject-progress-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+.sleep-stage-timeline {
+  display: flex;
+  min-height: 2.5rem;
+  overflow: hidden;
+  margin: 1rem 0;
+  border-radius: 0.65rem;
+  background: #eef2f6;
+}
+
+.sleep-stage-timeline span {
+  min-width: 2px;
+  background: var(--stage-color);
+}
+
+.sleep-stage-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1rem;
+}
+
+.sleep-stage-legend span {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: #667085;
+  font-size: 0.85rem;
+}
+
+.sleep-stage-legend i {
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 50%;
+}

@@ -1,0 +1,8 @@
+{% macro render_date_navigation(nav) %}
+  {% if not nav.is_today %}
+    <nav class="date-context-compact" aria-label="Data selecionada">
+      <span>{{ nav.compact_label }}</span>
+      <a class="button button--secondary" href="{{ nav.today_url }}">Voltar para hoje</a>
+    </nav>
+  {% endif %}
+{% endmacro %}

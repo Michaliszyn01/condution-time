@@ -1,0 +1,32 @@
+{% from "components/icon_badge.html" import icon_badge %}
+
+{% macro session_summary() %}
+  <article class="card session-result-card grid-span-5">
+    <div class="session-result-icon">
+      <i data-lucide="circle-check-big" aria-hidden="true"></i>
+    </div>
+    <p class="card-label">Resultado da sessão</p>
+    <h2>Boa sessão!</h2>
+    <p class="session-result-activity" data-summary-title>Sessão concluída</p>
+
+    <dl class="session-result-metrics">
+      <div>
+        <dt>Tempo total</dt>
+        <dd data-summary-duration>0 min</dd>
+      </div>
+      <div>
+        <dt>Foco estimado</dt>
+        <dd data-summary-focus>—</dd>
+      </div>
+      <div>
+        <dt>Pontos conquistados</dt>
+        <dd class="is-positive" data-summary-points>+0 pts</dd>
+      </div>
+    </dl>
+
+    <p class="session-simulation-note">
+      Bônus oficial da sessão. O total diário é limitado a 10 pontos.
+      <strong data-summary-daily-bonus>0 / 10 pts no dia.</strong>
+    </p>
+  </article>
+{% endmacro %}

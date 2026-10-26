@@ -1,0 +1,15 @@
+{% macro registration_conditional_field(id, name, label, placeholder) %}
+  <div class="registration-field registration-field--wide" data-conditional-field hidden>
+    <label for="{{ id }}">{{ label }}</label>
+    <input
+      id="{{ id }}"
+      name="{{ name }}"
+      type="text"
+      placeholder="{{ placeholder }}"
+      aria-describedby="{{ id }}-error"
+    >
+    <p class="registration-error" id="{{ id }}-error" data-field-error hidden>
+      Informe onde sentiu o desconforto.
+    </p>
+  </div>
+{% endmacro %}

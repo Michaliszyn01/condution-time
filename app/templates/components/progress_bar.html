@@ -1,0 +1,11 @@
+{% macro progress_bar(value, max_value=100, theme="blue", label="Progresso") %}
+  <progress
+    class="progress-bar progress-bar--{{ theme }}"
+    value="{{ value }}"
+    max="{{ max_value }}"
+    aria-label="{{ label }}: {{ value }} de {{ max_value }}"
+  >
+    {{ value }} de {{ max_value }}
+  </progress>
+{% endmacro %}
+

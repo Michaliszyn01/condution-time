@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+
+{% block title %}Configurações{% endblock %}
+
+{% block page_styles %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/settings.css') }}">
+{% endblock %}
+
+{% block content %}
+  <section class="settings-page" aria-labelledby="settings-title">
+    <header class="settings-heading">
+      <div>
+        <p class="settings-kicker">APLICATIVO</p>
+        <h1 id="settings-title">Configurações</h1>
+        <p>Defina como o Condution Time se comporta no Windows.</p>
+      </div>
+      <span class="settings-status" id="desktop-status">Verificando modo desktop…</span>
+    </header>
+
+    <form class="settings-card" id="desktop-settings-form">
+      <div class="settings-row">
+        <div>
+          <label for="start-with-windows">Iniciar com o Windows</label>
+          <p>Abre o aplicativo automaticamente após entrar na sua conta.</p>
+        </div>
+        <input id="start-with-windows" name="start_with_windows" type="checkbox" role="switch">
+      </div>
+
+      <div class="settings-section-heading">
+        <p class="settings-kicker">PRIVACIDADE</p>
+        <h2>Monitoramento do computador</h2>
+        <p>Registra apenas qual aplicativo está em primeiro plano e por quanto tempo.</p>
+      </div>
+
+      <div class="settings-row">
+        <div>
+          <label for="monitoring-enabled">Monitorar uso do computador</label>
+          <p>Você pode pausar, retomar ou desligar quando quiser.</p>
+        </div>
+        <input id="monitoring-enabled" name="monitoring_enabled" type="checkbox" role="switch">
+      </div>
+
+      <div class="settings-row">
+        <div>
+          <label for="start-monitoring-with-app">Iniciar monitoramento com o aplicativo</label>
+          <p>Mostra o estado na bandeja; o monitoramento não fica escondido.</p>
+        </div>
+        <input id="start-monitoring-with-app" name="start_monitoring_with_app" type="checkbox" role="switch">
+      </div>
+
+      <div class="settings-row">
+        <div>
+          <label for="idle-threshold-minutes">Considerar ocioso após</label>
+          <p>Tempo sem entrada do teclado ou mouse; nenhum conteúdo é capturado.</p>
+        </div>
+        <label class="settings-number-field">
+          <input id="idle-threshold-minutes" type="number" min="1" max="120">
+          <span>min</span>
+        </label>
+      </div>
+
+      <div class="settings-row">
+        <div>
+          <label for="sample-interval-seconds">Intervalo de captura</label>
+          <p>Uma consulta leve ao aplicativo em primeiro plano.</p>
+        </div>
+        <label class="settings-number-field">
+          <input id="sample-interval-seconds" type="number" min="1" max="10">
+          <span>s</span>
+        </label>
+      </div>
+
+      <details class="settings-advanced settings-privacy">
+        <summary>Quais dados são registrados?</summary>
+        <p><strong>Registrados:</strong> aplicativo, horário, duração e classificação.</p>
+        <p><strong>Não registrados:</strong> teclas, textos, tela, áudio, câmera, arquivos, mensagens, senhas, URLs e títulos de janela.</p>
+        <p>Os dados permanecem somente neste computador.</p>
+      </details>
+
+      <div class="settings-section-heading" id="health-connection">
+        <p class="settings-kicker">DADOS LOCAIS</p>
+        <h2>Conexão com Saúde</h2>
+        <p>Importa exportações do Health Connect já sincronizadas no computador.</p>
+      </div>
+
+      <div class="settings-row">
+        <div>
+          <label for="health-import-enabled">Ativar importação automática</label>
+          <p>Observa a pasta escolhida sem OAuth e sem enviar dados para a nuvem.</p>
+        </div>
+        <input id="health-import-enabled" type="checkbox" role="switch">
+      </div>
+
+      <div class="settings-row">
+        <div>
+          <label>Pasta monitorada</label>
+          <p id="health-folder-label">Nenhuma pasta selecionada.</p>
+        </div>
+        <button class="button" id="select-health-folder" type="button">Procurar pasta</button>
+      </div>
+
+      <div class="settings-row">
+        <div>
+          <label for="health-poll-seconds">Buscar alterações a cada</label>
+          <p>Entre 30 e 3600 segundos.</p>
+        </div>
+        <label class="settings-number-field"><input id="health-poll-seconds" type="number" min="30" max="3600"><span>s</span></label>
+      </div>
+
+      <div class="settings-row">
+        <div>
+          <label for="health-stability-seconds">Aguardar estabilidade</label>
+          <p>Evita importar enquanto o Google Drive ainda está sincronizando.</p>
+        </div>
+        <label class="settings-number-field"><input id="health-stability-seconds" type="number" min="5" max="120"><span>s</span></label>
+      </div>
+
+      <div class="settings-health-status" id="health-import-status">
+        <strong>Status: verificando…</strong>
+        <span id="health-import-details"></span>
+        <button class="button button-primary" id="health-import-now" type="button">Importar agora</button>
+      </div>
+
+      <div class="settings-row">
+        <div>
+          <label for="open-at-startup">Abrir janela ao iniciar</label>
+          <p>Mostra a janela principal quando o aplicativo é iniciado.</p>
+        </div>
+        <input id="open-at-startup" name="open_at_startup" type="checkbox" role="switch">
+      </div>
+
+      <div class="settings-row">
+        <div>
+          <label for="continue-in-tray">Continuar na bandeja ao fechar</label>
+          <p>Mantém o aplicativo disponível perto do relógio do Windows.</p>
+        </div>
+        <input id="continue-in-tray" name="continue_in_tray" type="checkbox" role="switch">
+      </div>
+
+      <details class="settings-advanced">
+        <summary>Avançado</summary>
+        <label for="preferred-port">Porta local preferida</label>
+        <input id="preferred-port" name="preferred_port" type="number" min="5000" max="5010">
+        <p>Se estiver ocupada, o aplicativo procura outra porta entre as próximas dez.</p>
+      </details>
+
+      <div class="settings-actions">
+        <button class="button button-primary" type="submit">Salvar preferências</button>
+        <button class="button" id="open-data-folder" type="button">Abrir pasta de dados</button>
+        <button class="button" id="open-logs-folder" type="button">Abrir pasta de logs</button>
+        <a class="button" href="{{ url_for('main.computador') }}#application-rules">Regras de aplicativos</a>
+        <button class="button" id="clear-computer-data" type="button">Limpar dados de monitoramento</button>
+      </div>
+      <p class="settings-feedback" id="settings-feedback" aria-live="polite"></p>
+    </form>
+  </section>
+{% endblock %}
+
+{% block page_scripts %}
+  <script src="{{ url_for('static', filename='js/settings.js') }}"></script>
+{% endblock %}

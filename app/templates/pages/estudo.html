@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% from "components/score_card.html" import score_card %}
+{% from "components/metric_card.html" import metric_card %}
+{% from "components/list_card.html" import list_card %}
+{% from "components/weekly_chart_card.html" import weekly_chart_card %}
+{% from "components/progress_list.html" import progress_list %}
+{% from "components/action_card.html" import action_card %}
+{% from "components/heatmap_calendar.html" import heatmap_calendar %}
+{% from "components/date_navigation.html" import render_date_navigation %}
+
+{% block title %}Estudo{% endblock %}
+
+{% block page_styles %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/study.css') }}">
+{% endblock %}
+
+{% block content %}
+  {{ render_date_navigation(date_navigation) }}
+  <section class="dashboard-grid study-dashboard" aria-label="Painel de estudos">
+    {{ score_card(
+      study_data.score,
+      "Pontuação de estudo",
+      "Visão geral",
+      "grid-span-4 study-score-card"
+    ) }}
+
+    <section class="study-metrics-grid grid-span-8" aria-label="Métricas de estudo">
+      {% for metric in study_data.metrics %}
+        {{ metric_card(
+          metric.title,
+          metric.value,
+          metric.helper,
+          metric.icon,
+          metric.theme,
+          "study-metric-card",
+          "",
+          metric.helper_tone
+        ) }}
+      {% endfor %}
+    </section>
+
+    {{ list_card(
+      "O que estudei hoje",
+      study_data.sessions,
+      "Ver todas as sessões",
+      "grid-span-3 study-detail-card",
+      url_for("main.historico", categoria="study"),
+      study_data.sessions_empty
+    ) }}
+
+    {{ weekly_chart_card(
+      study_data.weekly,
+      "grid-span-5 study-detail-card"
+    ) }}
+
+    {{ progress_list(
+      "Matérias",
+      study_data.subjects,
+      "Ver todas as matérias",
+      "grid-span-4 study-detail-card",
+      study_data.subjects_empty
+    ) }}
+
+    {{ action_card(
+      url_for("main.sessao"),
+      "#",
+      study_data.next_session.title,
+      study_data.next_session.subtitle,
+      "Planejamento",
+      "book-open-check",
+      "grid-span-6 study-action-card",
+      "Iniciar sessão",
+      "Ver plano de estudos",
+      study_data.next_session,
+      study_data.next_session.status
+    ) }}
+
+    {{ heatmap_calendar(
+      study_data.heatmap,
+      "grid-span-6"
+    ) }}
+  </section>
+{% endblock %}
+
+{% block page_scripts %}
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <script src="{{ url_for('static', filename='js/study.js') }}"></script>
+{% endblock %}

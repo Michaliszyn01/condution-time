@@ -1,0 +1,203 @@
+<header class="topbar" data-global-header data-current-route="{{ request.endpoint or '' }}">
+  <div class="topbar-copy">
+    <p class="eyebrow">
+      {{ page_date_label|default(home_page_data.today.date_label if home_page_data is defined else current_date_label) }}
+    </p>
+    <h1 class="page-title">{{ page_title|default("Bom dia, " ~ user_identity.name ~ "!") }}</h1>
+    <p class="page-subtitle">
+      {{ page_description|default("Aqui está o seu progresso de hoje.") }}
+    </p>
+  </div>
+
+  <div class="topbar-actions" aria-label="Ações do usuário">
+    <div class="topbar-control" data-header-control="hydration">
+      <button
+        class="icon-button"
+        type="button"
+        title="Registrar água"
+        aria-label="Registrar água"
+        aria-expanded="false"
+        aria-controls="hydration-popover"
+        data-popover-toggle="hydration"
+      >
+        <svg class="water-bottle-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M9 3h6M10 3v3l-2 2v11a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V8l-2-2V3M8 12h8M10.5 15.5h3"></path>
+        </svg>
+      </button>
+      <section
+        class="header-popover hydration-popover card"
+        id="hydration-popover"
+        role="dialog"
+        aria-labelledby="hydration-title"
+        data-popover="hydration"
+        hidden
+      >
+        <div class="popover-heading">
+          <div>
+            <strong id="hydration-title">Registrar hidratação</strong>
+            <p>Quanto de água você bebeu?</p>
+          </div>
+          <button class="popover-close" type="button" aria-label="Fechar hidratação" data-popover-close>
+            <i data-lucide="x" aria-hidden="true"></i>
+          </button>
+        </div>
+
+        <div class="hydration-summary">
+          <div>
+            <span>Hoje</span>
+            <strong data-water-total>{{ header_state.hydration.total_ml|int }} ml</strong>
+          </div>
+          <div>
+            <span>Meta diária</span>
+            <strong data-water-goal>{{ header_state.hydration.goal_ml|int }} ml</strong>
+          </div>
+        </div>
+        <div
+          class="hydration-progress"
+          role="progressbar"
+          aria-label="Progresso da meta de hidratação"
+          aria-valuemin="0"
+          aria-valuemax="100"
+          aria-valuenow="{{ [header_state.hydration.percentage, 100]|min|round|int }}"
+          data-water-progress
+        >
+          <span style="width: {{ [header_state.hydration.percentage, 100]|min }}%"></span>
+        </div>
+        <p class="hydration-percentage" data-water-percentage>
+          {{ header_state.hydration.percentage|round(1) }}% da meta
+        </p>
+
+        <div class="quick-water-options" role="group" aria-label="Atalhos de quantidade">
+          {% for amount in (200, 300, 500) %}
+            <button class="button button--secondary" type="button" data-water-amount="{{ amount }}">{{ amount }} ml</button>
+          {% endfor %}
+        </div>
+
+        <form data-water-custom novalidate>
+          <label for="quick-water-custom">Quantidade personalizada</label>
+          <div class="amount-input">
+            <input id="quick-water-custom" name="amount_ml" type="number" min="10" max="5000" step="1" inputmode="numeric" aria-describedby="quick-water-help quick-water-feedback" required>
+            <span>ml</span>
+          </div>
+          <p class="field-help" id="quick-water-help">Entre 10 e 5.000 ml.</p>
+          <button class="button button--primary" type="submit">Registrar</button>
+        </form>
+
+        <p class="popover-feedback" id="quick-water-feedback" aria-live="polite" data-water-feedback></p>
+        <div class="hydration-footer">
+          <span>Horário: <strong data-water-time>{{ header_state.hydration.current_time }}</strong></span>
+          <a href="{{ url_for('main.historico', type='hydration') }}">Ver histórico</a>
+        </div>
+        <ul class="recent-water" aria-label="Registros recentes de hoje" data-water-recent>
+          {% for record in header_state.hydration.recent_records %}
+            <li><span>{{ record.consumed_at }}</span><strong>{{ record.amount_ml }} ml</strong></li>
+          {% endfor %}
+        </ul>
+      </section>
+    </div>
+
+    <div class="topbar-control" data-header-control="notifications">
+      <button
+        class="icon-button notification-button"
+        type="button"
+        aria-label="Abrir notificações"
+        aria-expanded="false"
+        aria-controls="notifications-popover"
+        data-popover-toggle="notifications"
+      >
+        <i data-lucide="bell" aria-hidden="true"></i>
+        <span
+          class="notification-badge"
+          data-notification-badge
+          aria-label="{{ header_state.unread_notifications_count }} notificações não lidas"
+          {% if not header_state.unread_notifications_count %}hidden{% endif %}
+        >{{ "9+" if header_state.unread_notifications_count > 9 else header_state.unread_notifications_count }}</span>
+      </button>
+      <section
+        class="header-popover notifications-popover card"
+        id="notifications-popover"
+        role="dialog"
+        aria-labelledby="notifications-title"
+        data-popover="notifications"
+        hidden
+      >
+        <div class="popover-heading">
+          <strong id="notifications-title">Notificações</strong>
+          <button class="text-button" type="button" data-notifications-read-all>Marcar todas como lidas</button>
+        </div>
+        <div class="notification-list" data-notification-list>
+          {% for notification in header_state.notifications["items"] %}
+            <article class="notification-item{% if not notification.is_read %} is-unread{% endif %}" data-notification-id="{{ notification.id }}">
+              <span class="notification-icon notification-icon--{{ notification.severity }}" aria-hidden="true">
+                <i data-lucide="{{ 'circle-alert' if notification.severity in ('warning', 'error') else 'bell-ring' }}"></i>
+              </span>
+              <div>
+                <strong>{{ notification.title }}</strong>
+                <p>{{ notification.message }}</p>
+                <time datetime="{{ notification.created_at }}">{{ notification.relative_time }}</time>
+                {% if notification.action_url %}<a href="{{ notification.action_url }}">Abrir</a>{% endif %}
+              </div>
+              {% if not notification.is_read %}
+                <button type="button" class="notification-read" aria-label="Marcar como lida" data-notification-read>
+                  <i data-lucide="check" aria-hidden="true"></i>
+                </button>
+              {% endif %}
+            </article>
+          {% else %}
+            <div class="notification-empty">
+              <i data-lucide="bell-off" aria-hidden="true"></i>
+              <strong>Nenhuma notificação</strong>
+              <p>Os avisos úteis do aplicativo aparecerão aqui.</p>
+            </div>
+          {% endfor %}
+        </div>
+        <a class="popover-all-link" href="{{ url_for('main.notificacoes') }}">Ver todas</a>
+      </section>
+    </div>
+
+    <div class="topbar-control" data-header-control="profile">
+      <button
+        class="profile-summary"
+        type="button"
+        title="{{ user_identity.name }}"
+        aria-label="Abrir menu do perfil de {{ user_identity.name }}"
+        aria-expanded="false"
+        aria-controls="profile-popover"
+        data-popover-toggle="profile"
+      >
+        <span class="avatar" aria-hidden="true">{{ user_identity.initials }}</span>
+        <span class="profile-copy">
+          <strong>{{ user_identity.name }}</strong>
+          <span>Meu perfil</span>
+        </span>
+        <i class="profile-chevron" data-lucide="chevron-down" aria-hidden="true"></i>
+      </button>
+      <section
+        class="header-popover profile-popover card"
+        id="profile-popover"
+        role="menu"
+        aria-label="Menu do perfil"
+        data-popover="profile"
+        hidden
+      >
+        <a role="menuitem" href="{{ url_for('main.perfil') }}"><i data-lucide="user"></i>Meu perfil</a>
+        <a role="menuitem" href="{{ url_for('main.configuracoes') }}"><i data-lucide="settings"></i>Configurações</a>
+        <button
+          role="menuitem"
+          type="button"
+          data-desktop-action="open-data-folder"
+          {% if not header_state.desktop.available %}disabled title="Disponível apenas no aplicativo Windows"{% endif %}
+        ><i data-lucide="folder-open"></i>Pasta de dados</button>
+        <button
+          role="menuitem"
+          type="button"
+          data-desktop-action="exit"
+          {% if not header_state.desktop.available %}disabled title="Disponível apenas no aplicativo Windows"{% endif %}
+        ><i data-lucide="log-out"></i>Sair</button>
+        {% if not header_state.desktop.available %}
+          <p class="desktop-only-note">Ações de pasta e saída ficam disponíveis no aplicativo Windows.</p>
+        {% endif %}
+      </section>
+    </div>
+  </div>
+</header>

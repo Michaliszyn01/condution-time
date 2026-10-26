@@ -1,0 +1,300 @@
+{% extends "base.html" %}
+
+{% block title %}Perfil{% endblock %}
+
+{% block page_styles %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/profile.css') }}">
+{% endblock %}
+
+{% macro metrics(items) %}
+  <div class="profile-metrics">
+    {% for metric in items %}
+      <article class="card profile-metric">
+        <span>{{ metric.label }}</span>
+        <strong>{{ metric.value }}{% if metric.unit %} <small>{{ metric.unit }}</small>{% endif %}</strong>
+        {% if metric.detail %}<small>{{ metric.detail }}</small>{% endif %}
+      </article>
+    {% endfor %}
+  </div>
+{% endmacro %}
+
+{% macro empty_state(icon, text) %}
+  <div class="profile-empty card">
+    <i data-lucide="{{ icon }}" aria-hidden="true"></i>
+    <p>{{ text }}</p>
+  </div>
+{% endmacro %}
+
+{% block content %}
+<section class="profile-page" data-profile-page data-tab="{{ profile_data.tab }}">
+  <header class="profile-hero card">
+    <span class="profile-avatar" data-profile-avatar>{{ profile_data.header.initials }}</span>
+    <div class="profile-identity">
+      <p class="profile-kicker">EVOLUÇÃO PESSOAL</p>
+      <h1 data-profile-name>{{ profile_data.header.name }}</h1>
+      <div class="profile-level-line">
+        <strong>Nível {{ profile_data.header.level }}</strong>
+        <span>{{ profile_data.header.current_xp }} XP / {{ profile_data.header.next_level_xp }} XP</span>
+      </div>
+      <div class="profile-progress" role="progressbar" aria-label="Progresso para o próximo nível" aria-valuenow="{{ profile_data.header.progress_percent }}" aria-valuemin="0" aria-valuemax="100">
+        <i style="width: {{ profile_data.header.progress_percent }}%"></i>
+      </div>
+      <div class="profile-level-meta">
+        <span>{{ profile_data.header.total_xp }} XP total</span>
+        <span><i data-lucide="flame" aria-hidden="true"></i> Sequência atual: {{ profile_data.header.current_streak }} {{ "dia" if profile_data.header.current_streak == 1 else "dias" }}</span>
+      </div>
+    </div>
+    <div class="profile-hero-actions">
+      <label class="profile-period" for="profile-period">
+        <span>Período</span>
+        <select id="profile-period">
+          {% for key, label in profile_data.periods %}
+            <option value="{{ key }}" {% if profile_data.period == key %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <button class="button button--secondary button--small" type="button" data-open-modal="profile-edit-dialog">
+        <i data-lucide="pencil" aria-hidden="true"></i> Editar perfil
+      </button>
+    </div>
+  </header>
+
+  <nav class="profile-tabs" role="tablist" aria-label="Seções do perfil">
+    {% for key, label in profile_data.tabs %}
+      <a
+        role="tab"
+        aria-selected="{{ 'true' if profile_data.tab == key else 'false' }}"
+        tabindex="{{ '0' if profile_data.tab == key else '-1' }}"
+        class="{{ 'is-active' if profile_data.tab == key }}"
+        href="{{ url_for('main.perfil', tab=key, period=profile_data.period) }}"
+      >{{ label }}</a>
+    {% endfor %}
+  </nav>
+
+  <main class="profile-content" id="profile-tab-content" role="tabpanel" tabindex="-1">
+    {% set data = profile_data.content %}
+
+    {% if profile_data.tab == "overview" %}
+      <div class="profile-section-heading">
+        <div><p class="profile-kicker">PANORAMA</p><h2>Visão geral</h2></div>
+        <span class="profile-period-chip">{{ profile_data.period_label }}</span>
+      </div>
+      {{ metrics(data.metrics) }}
+      {% if data.has_data %}
+        <div class="profile-grid profile-grid--wide">
+          <article class="card profile-chart-card">
+            <div><p class="profile-kicker">EVOLUÇÃO GERAL</p><h3>Consistência por categoria</h3></div>
+            <div class="profile-chart"><canvas id="profile-overview-chart" aria-label="Comparação da consistência por categoria"></canvas></div>
+            <p class="profile-chart-legend">Escala normalizada de cobertura, de 0 a 100%. Período atual e anterior de mesmo tamanho.</p>
+          </article>
+          <article class="card profile-period-summary">
+            <p class="profile-kicker">SEU PERÍODO</p>
+            <h3>{{ profile_data.period_label }}</h3>
+            <p>{{ data.summary }}</p>
+            {% if data.comparison.percentage is not none %}
+              <span class="profile-trend">{{ "%+.1f"|format(data.comparison.percentage) }}% de consistência versus o período anterior</span>
+            {% endif %}
+          </article>
+        </div>
+        <div class="profile-grid">
+          <article class="card profile-highlights">
+            <p class="profile-kicker">RESUMO</p><h3>Destaques do período</h3>
+            <div class="profile-highlight-list">
+              {% for item in data.highlights %}
+                <div><span>{{ item.label }}</span><strong>{{ item.value }}</strong><small>{{ item.detail }}</small></div>
+              {% else %}
+                <p>Dados insuficientes para gerar destaques.</p>
+              {% endfor %}
+            </div>
+          </article>
+          <article class="card profile-timeline">
+            <div class="profile-card-heading"><div><p class="profile-kicker">PROGRESSÃO</p><h3>Últimas fontes de XP</h3></div><a href="{{ url_for('profile_api.xp_history') }}">Ver histórico de XP</a></div>
+            <ol>
+              {% for event in data.xp_timeline %}
+                <li><i data-lucide="{{ event.icon }}" aria-hidden="true"></i><div><strong>{{ event.label }}</strong><small>{{ event.date_label }}</small></div><b>+{{ event.xp }} XP</b></li>
+              {% else %}
+                <li class="profile-timeline-empty">Nenhum evento de XP registrado ainda.</li>
+              {% endfor %}
+            </ol>
+          </article>
+        </div>
+        <script type="application/json" id="profile-chart-data">{{ data.coverage|tojson }}</script>
+      {% else %}
+        {{ empty_state("chart-no-axes-column-increasing", "Registre atividades para acompanhar sua evolução ao longo do tempo.") }}
+      {% endif %}
+
+    {% elif profile_data.tab == "study" %}
+      <div class="profile-section-heading"><div><p class="profile-kicker">APRENDIZAGEM</p><h2>Estudos</h2></div><span class="profile-period-chip">{{ profile_data.period_label }}</span></div>
+      {{ metrics(data.metrics) }}
+      {% if data.has_data %}
+        <article class="card profile-chart-card">
+          <div class="profile-card-heading"><div><h3>Evolução semanal por matéria</h3><p>Barras empilhadas em minutos estudados.</p></div>{% if data.comparison.percentage is not none %}<span class="profile-trend">{{ "%+.1f"|format(data.comparison.percentage) }}%</span>{% endif %}</div>
+          <div class="profile-chart"><canvas id="profile-study-chart" aria-label="Minutos de estudo por matéria e semana"></canvas></div>
+        </article>
+        <section>
+          <div class="profile-section-heading"><div><p class="profile-kicker">NÍVEIS</p><h3>Matérias</h3></div><small>Nível da matéria, separado do nível geral</small></div>
+          <div class="profile-subject-grid">
+            {% for subject in data.subjects %}
+              <article class="card profile-subject">
+                <div class="profile-subject-heading"><span class="profile-subject-dot" style="--subject-color: {{ subject.color }}"></span><strong>{{ subject.display_name }}</strong><b>Nível {{ subject.level }}</b></div>
+                <p>{{ subject.current_xp }} XP / {{ subject.next_level_xp }} XP</p>
+                <div class="profile-progress" role="progressbar" aria-label="Progresso de {{ subject.display_name }}" aria-valuenow="{{ subject.progress_percent }}" aria-valuemin="0" aria-valuemax="100"><i style="width:{{ subject.progress_percent }}%;background:{{ subject.color }}"></i></div>
+                <div class="profile-subject-meta"><span>{{ subject.duration }}</span><span>{{ subject.sessions }} {{ "sessão" if subject.sessions == 1 else "sessões" }}</span>{% if subject.questions %}<span>{{ subject.questions }} questões</span>{% endif %}{% if subject.accuracy is not none %}<span>{{ subject.accuracy }}% de acertos</span>{% endif %}</div>
+              </article>
+            {% endfor %}
+          </div>
+        </section>
+        <script type="application/json" id="profile-chart-data">{{ data.chart|tojson }}</script>
+      {% else %}
+        {{ empty_state("book-open", "Registre sessões de estudo para acompanhar sua evolução.") }}
+      {% endif %}
+
+    {% elif profile_data.tab == "health" %}
+      <div class="profile-section-heading"><div><p class="profile-kicker">TENDÊNCIAS DESCRITIVAS</p><h2>Corpo e saúde</h2></div><span class="profile-period-chip">{{ profile_data.period_label }}</span></div>
+      {% if data.has_data %}
+        {{ metrics(data.metrics) }}
+        <div class="profile-grid profile-grid--wide">
+          {% if data.weight.points %}
+            <article class="card profile-chart-card">
+              <h3>Evolução do peso</h3>
+              <div class="profile-chart"><canvas id="profile-health-chart" aria-label="Medições de peso e média móvel de sete medições"></canvas></div>
+              <p class="profile-chart-legend">Pontos individuais e média móvel de até 7 medições. Sem definição de peso ideal.</p>
+            </article>
+          {% endif %}
+          <article class="card profile-watch-card">
+            <div class="profile-watch-title"><i data-lucide="watch" aria-hidden="true"></i><div><p class="profile-kicker">ORIGEM</p><h3>{{ data.watch.source }}</h3></div></div>
+            <p>Última sincronização: <strong>{{ data.watch.last_sync_label or "ainda não registrada" }}</strong></p>
+            <dl>
+              {% if data.watch.days %}<div><dt>Dias com dados</dt><dd>{{ data.watch.days }}</dd></div>{% endif %}
+              {% if data.watch.average_steps is not none %}<div><dt>Passos médios</dt><dd>{{ data.watch.average_steps }}</dd></div>{% endif %}
+              {% if data.watch.average_active_calories is not none %}<div><dt>Calorias ativas médias</dt><dd>{{ data.watch.average_active_calories }} kcal</dd></div>{% endif %}
+              {% if data.watch.distance_km is not none %}<div><dt>Distância acumulada</dt><dd>{{ data.watch.distance_km }} km</dd></div>{% endif %}
+              {% if data.watch.average_heart_rate is not none %}<div><dt>FC média</dt><dd>{{ data.watch.average_heart_rate }} bpm</dd></div>{% endif %}
+            </dl>
+          </article>
+        </div>
+        <script type="application/json" id="profile-chart-data">{{ data.weight.points|tojson }}</script>
+      {% else %}
+        {{ empty_state("heart-pulse", "Importe ou registre medidas para visualizar tendências.") }}
+      {% endif %}
+
+    {% elif profile_data.tab == "training" %}
+      <div class="profile-section-heading"><div><p class="profile-kicker">FREQUÊNCIA E VOLUME</p><h2>Treinos</h2></div><span class="profile-period-chip">{{ profile_data.period_label }}</span></div>
+      {{ metrics(data.metrics) }}
+      {% if data.has_data %}
+        <div class="profile-grid profile-grid--wide">
+          <article class="card profile-chart-card"><h3>Frequência no período</h3><div class="profile-chart"><canvas id="profile-training-chart" aria-label="Sessões e duração de treinos"></canvas></div></article>
+          <article class="card profile-ranking"><h3>Modalidades</h3>{% for item in data.modalities %}<div><span class="profile-subject-dot" style="--subject-color:{{ item.color }}"></span><strong>{{ item.name }}</strong><span>{{ item.sessions }} sessões</span><small>{{ item.minutes }} min · {{ (item.distance / 1000)|round(1) }} km</small></div>{% endfor %}</article>
+        </div>
+        <script type="application/json" id="profile-chart-data">{{ data.daily|tojson }}</script>
+      {% else %}
+        {{ empty_state("dumbbell", "Nenhum treino encontrado neste período.") }}
+      {% endif %}
+
+    {% elif profile_data.tab == "sleep" %}
+      <div class="profile-section-heading"><div><p class="profile-kicker">REGULARIDADE</p><h2>Sono</h2></div><span class="profile-period-chip">{{ profile_data.period_label }}</span></div>
+      {{ metrics(data.metrics) }}
+      {% if data.has_data %}
+        <div class="profile-grid profile-grid--wide">
+          <article class="card profile-chart-card"><h3>Duração por noite</h3><div class="profile-chart"><canvas id="profile-sleep-chart" aria-label="Duração do sono por noite"></canvas></div><p class="profile-chart-legend">Informação descritiva; não representa diagnóstico médico.</p></article>
+          <article class="card profile-ranking"><h3>Estágios médios registrados</h3>{% for item in data.stages %}<div><strong>{{ item.label }}</strong><span>{{ item.percent }}%</span><small>{{ item.minutes }} min acumulados</small></div>{% else %}<p>O relógio ainda não forneceu estágios neste período.</p>{% endfor %}</article>
+        </div>
+        <script type="application/json" id="profile-chart-data">{{ data.daily|tojson }}</script>
+      {% else %}
+        {{ empty_state("moon-star", "Nenhuma noite acompanhada neste período.") }}
+      {% endif %}
+
+    {% elif profile_data.tab == "computer" %}
+      <div class="profile-section-heading"><div><p class="profile-kicker">USO CLASSIFICADO</p><h2>Computador</h2></div><span class="profile-period-chip">{{ profile_data.period_label }}</span></div>
+      {{ metrics(data.metrics) }}
+      {% if data.has_data %}
+        <div class="profile-grid profile-grid--wide">
+          <article class="card profile-chart-card"><h3>Produtivo x distração por dia</h3><div class="profile-chart"><canvas id="profile-computer-chart" aria-label="Tempo produtivo e de distração por dia"></canvas></div></article>
+          <article class="card profile-computer-details"><h3>Destaques classificados</h3><dl><div><dt>Projeto mais trabalhado</dt><dd>{{ data.top_project or "Sem projeto identificado" }}</dd></div><div><dt>Aplicativo produtivo</dt><dd>{{ data.top_productive_app or "Sem dados" }}</dd></div><div><dt>Aplicativo de distração</dt><dd>{{ data.top_distracting_app or "Sem dados" }}</dd></div><div><dt>ChatGPT</dt><dd>{{ (data.chatgpt_seconds / 60)|round|int }} min</dd></div><div><dt>VS Code</dt><dd>{{ (data.vscode_seconds / 60)|round|int }} min</dd></div></dl></article>
+        </div>
+        <div class="profile-grid">{% if data.projects %}<article class="card profile-ranking"><h3>Projetos</h3>{% for item in data.projects %}<div><strong>{{ item.name }}</strong><span>{{ (item.seconds / 60)|round|int }} min</span></div>{% endfor %}</article>{% endif %}{% if data.categories %}<article class="card profile-ranking"><h3>Categorias</h3>{% for item in data.categories %}<div><strong>{{ item.name }}</strong><span>{{ (item.seconds / 60)|round|int }} min</span></div>{% endfor %}</article>{% endif %}</div>
+        <script type="application/json" id="profile-chart-data">{{ data.daily|tojson }}</script>
+      {% else %}
+        {{ empty_state("monitor", "O monitoramento ainda não possui dados neste período.") }}
+      {% endif %}
+
+    {% elif profile_data.tab == "achievements" %}
+      <div class="profile-section-heading"><div><p class="profile-kicker">MARCOS ACUMULADOS</p><h2>Conquistas</h2></div></div>
+      <div class="profile-metrics profile-metrics--summary">
+        <article class="card profile-metric"><span>Desbloqueadas</span><strong>{{ data.summary.unlocked }}</strong></article>
+        <article class="card profile-metric"><span>Disponíveis</span><strong>{{ data.summary.available }}</strong></article>
+        <article class="card profile-metric"><span>XP recebido</span><strong>{{ data.summary.xp_received }} <small>XP</small></strong></article>
+        <article class="card profile-metric"><span>Última conquista</span><strong class="profile-metric-text">{{ data.summary.latest or "Nenhuma" }}</strong></article>
+      </div>
+      <div class="profile-filter-row">
+        <div class="profile-segmented" aria-label="Status da conquista">
+          {% for key, label in [("all","Todas"),("unlocked","Desbloqueadas"),("next","Próximas")] %}
+            <a class="{{ 'is-active' if data.status == key }}" href="{{ url_for('main.perfil', tab='achievements', period=profile_data.period, category=data.category, status=key) }}">{{ label }}</a>
+          {% endfor %}
+        </div>
+        <div class="profile-filter-scroll">
+          {% for key, label in data.filters %}
+            <a class="{{ 'is-active' if data.category == key }}" href="{{ url_for('main.perfil', tab='achievements', period=profile_data.period, category=key, status=data.status) }}">{{ label }}</a>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="profile-achievements">
+        {% for item in data["items"] %}
+          <article class="card profile-achievement {{ 'is-unlocked' if item.unlocked }}">
+            <span class="profile-achievement-icon"><i data-lucide="{{ item.icon if item.unlocked else 'lock-keyhole' }}" aria-hidden="true"></i></span>
+            <div><div class="profile-card-heading"><strong>{{ item.name }}</strong><b>+{{ item.xp }} XP</b></div><small>{{ item.category }}{% if item.unlocked_at %} · {{ item.unlocked_at[:10] }}{% endif %}</small><p>{{ item.description }}</p><div class="profile-progress" role="progressbar" aria-label="{{ item.name }}" aria-valuenow="{{ item.progress_percent }}" aria-valuemin="0" aria-valuemax="100"><i style="width:{{ item.progress_percent }}%"></i></div><small>Requisito: {{ item.target_label }}</small></div>
+          </article>
+        {% else %}
+          {{ empty_state("trophy", "Nenhuma conquista corresponde a estes filtros.") }}
+        {% endfor %}
+      </div>
+
+    {% elif profile_data.tab == "goals" %}
+      <div class="profile-section-heading"><div><p class="profile-kicker">DIREÇÃO PESSOAL</p><h2>Metas</h2></div><button class="button button--primary button--small" type="button" data-open-modal="goals-edit-dialog"><i data-lucide="pencil" aria-hidden="true"></i> Editar metas</button></div>
+      <div class="profile-goals">
+        {% for goal in data.cards %}
+          <article class="card profile-goal">
+            <div class="profile-card-heading"><h3>{{ goal.title }}</h3><button class="profile-link-button" type="button" data-open-modal="{{ 'profile-edit-dialog' if goal.key in ['academic_goal','physical_goal'] else 'goals-edit-dialog' }}">Editar</button></div>
+            <strong>{{ goal.target_label }}</strong>
+            {% if goal.actual_label %}<span>{{ goal.actual_label }}</span>{% endif %}
+            {% if goal.progress is not none %}<div class="profile-progress" role="progressbar" aria-label="Progresso de {{ goal.title }}" aria-valuenow="{{ goal.progress }}" aria-valuemin="0" aria-valuemax="100"><i style="width:{{ goal.progress }}%"></i></div><small>{{ goal.progress }}%</small>{% endif %}
+          </article>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </main>
+
+  <dialog class="profile-dialog" id="profile-edit-dialog" aria-labelledby="profile-edit-title">
+    <form method="dialog" class="profile-dialog-close-form"><button aria-label="Fechar edição de perfil"><i data-lucide="x"></i></button></form>
+    <form class="profile-form" data-profile-form data-endpoint="/api/profile">
+      <div><p class="profile-kicker">IDENTIDADE</p><h2 id="profile-edit-title">Editar perfil</h2></div>
+      <label>Nome de exibição<input name="name" maxlength="120" value="{{ profile_data.header.name }}" required></label>
+      <label>Iniciais<input name="avatar_initials" maxlength="4" value="{{ profile_data.header.initials }}"></label>
+      <label>Objetivo acadêmico<textarea name="academic_goal" maxlength="500">{{ profile_data.header.academic_goal or "" }}</textarea></label>
+      <label>Objetivo físico<textarea name="physical_goal" maxlength="500">{{ profile_data.header.physical_goal or "" }}</textarea></label>
+      <p class="profile-form-feedback" data-form-feedback aria-live="polite"></p>
+      <div class="profile-form-actions"><button class="button button--secondary" type="button" data-close-modal>Cancelar</button><button class="button button--primary" type="submit">Salvar perfil</button></div>
+    </form>
+  </dialog>
+
+  {% if profile_data.tab == "goals" %}
+  <dialog class="profile-dialog" id="goals-edit-dialog" aria-labelledby="goals-edit-title">
+    <form method="dialog" class="profile-dialog-close-form"><button aria-label="Fechar edição de metas"><i data-lucide="x"></i></button></form>
+    <form class="profile-form" data-profile-form data-endpoint="/api/profile/goals">
+      <div><p class="profile-kicker">PLANEJAMENTO</p><h2 id="goals-edit-title">Editar metas</h2></div>
+      <label>Estudo semanal (min)<input name="weekly_study_minutes" type="number" min="1" value="{{ data.goal_values.weekly_study_minutes or '' }}"></label>
+      <label>Treinos por semana<input name="weekly_training_count" type="number" min="1" value="{{ data.goal_values.weekly_training_count or '' }}"></label>
+      <label>Sono por noite (min)<input name="sleep_target_minutes" type="number" min="1" value="{{ data.goal_values.sleep_target_minutes or '' }}"></label>
+      <label>Hidratação diária (ml)<input name="hydration_target_ml" type="number" min="1" value="{{ data.goal_values.hydration_target_ml or '' }}"></label>
+      <p class="profile-form-feedback" data-form-feedback aria-live="polite"></p>
+      <div class="profile-form-actions"><button class="button button--secondary" type="button" data-close-modal>Cancelar</button><button class="button button--primary" type="submit">Salvar metas</button></div>
+    </form>
+  </dialog>
+  {% endif %}
+</section>
+{% endblock %}
+
+{% block page_scripts %}
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <script src="{{ url_for('static', filename='js/profile.js') }}"></script>
+{% endblock %}

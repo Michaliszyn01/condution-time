@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% from "components/category_dashboard.html" import category_dashboard %}
+{% from "components/date_navigation.html" import render_date_navigation %}
+
+{% block title %}Sono{% endblock %}
+
+{% block page_styles %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/study.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/category-themes.css') }}">
+{% endblock %}
+
+{% block content %}
+  {{ render_date_navigation(date_navigation) }}
+  {{ category_dashboard(
+    sleep_data,
+    "purple",
+    "Painel de sono",
+    url_for("main.sessao")
+  ) }}
+  {% if sleep_data.sleep_sessions %}
+    <details class="card sleep-details-panel" id="sleep-night-details">
+      <summary>Ver detalhes da noite</summary>
+      <p class="profile-note">Os estágios originais são preservados; o sistema não força uma soma artificial. Tempo acordado resume acordado, acordado na cama e fora da cama somente nos indicadores.</p>
+      {% for session in sleep_data.sleep_sessions %}
+        <section class="sleep-session-detail">
+          <header class="section-card-header">
+            <div>
+              <p class="card-label">{{ session.kind }}</p>
+              <h2 class="card-title">{{ session.window }} · {{ session.duration }}</h2>
+            </div>
+          </header>
+          {% if session.stages.timeline %}
+            <div class="sleep-stage-timeline" role="img" aria-label="Linha do tempo de {{ session.kind|lower }}">
+              {% for stage in session.stages.timeline %}
+                <span
+                  style="--stage-color: {{ stage.color }}; flex-grow: {{ [stage.duration_minutes, 1]|max }}"
+                  title="{{ stage.label }} · {{ stage.started_at }}–{{ stage.ended_at }} · {{ stage.duration }}"
+                  aria-label="{{ stage.label }}, de {{ stage.started_at }} a {{ stage.ended_at }}, {{ stage.duration }}"
+                ></span>
+              {% endfor %}
+            </div>
+            <div class="sleep-stage-legend" aria-label="Legenda dos estágios">
+              {% for stage in session.stages["items"] %}
+                <span><i style="background: {{ stage.color }}" aria-hidden="true"></i>{{ stage.label }}: <strong>{{ stage.duration }} · {{ stage.percentage }}%</strong></span>
+              {% endfor %}
+            </div>
+          {% else %}
+            <p>Sem estágios detalhados nesta sessão.</p>
+          {% endif %}
+        </section>
+      {% endfor %}
+    </details>
+  {% endif %}
+{% endblock %}
+
+{% block page_scripts %}
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <script src="{{ url_for('static', filename='js/study.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/category-theme.js') }}"></script>
+{% endblock %}

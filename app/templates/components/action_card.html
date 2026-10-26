@@ -1,0 +1,60 @@
+{% from "components/button.html" import button %}
+
+{% macro action_card(
+  primary_href,
+  secondary_href,
+  title="Vamos começar hoje?",
+  description="Inicie uma sessão e transforme seu foco em progresso.",
+  label="Próximo passo",
+  icon="focus",
+  class_name="grid-span-12",
+  primary_label="Iniciar sessão",
+  secondary_label="Ver minha rotina",
+  details=none,
+  status=""
+) %}
+  <article class="action-card {{ class_name }}">
+    <div class="action-card-icon" aria-hidden="true">
+      <i data-lucide="{{ icon }}"></i>
+    </div>
+    <div class="action-card-copy">
+      <p class="card-label">{{ label }}</p>
+      <h2>{{ title }}</h2>
+      <p>{{ description }}</p>
+      {% if details %}
+        {% if details.stats %}
+          <div class="action-card-stats">
+            {% for item in details.stats %}
+              <div class="action-card-stat">
+                <i data-lucide="{{ item.icon }}" aria-hidden="true"></i>
+                <span>
+                  {{ item.label }}
+                  <strong>{{ item.value }}</strong>
+                </span>
+                {% if item.status %}<em>{{ item.status }}</em>{% endif %}
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="action-card-details">
+            <strong>{{ details.plan }}</strong>
+            <span>{{ details.subject }}</span>
+            <span>{{ details.duration }}</span>
+            {% if details.indicators %}
+              {% for indicator in details.indicators %}
+                <span>{{ indicator }}</span>
+              {% endfor %}
+            {% elif details.schedule %}
+              <span>{{ details.schedule }}</span>
+            {% endif %}
+            {% if status %}<em>{{ status }}</em>{% endif %}
+          </div>
+        {% endif %}
+      {% endif %}
+    </div>
+    <div class="action-card-actions">
+      {{ button(primary_label, primary_href, "primary", "play") }}
+      {{ button(secondary_label, secondary_href, "secondary", "layout-grid") }}
+    </div>
+  </article>
+{% endmacro %}

@@ -1,0 +1,7 @@
+{% macro button(label, href="#", variant="primary", icon="") %}
+  <a class="button button--{{ variant }}" href="{{ href }}">
+    {% if icon %}<i data-lucide="{{ icon }}" aria-hidden="true"></i>{% endif %}
+    <span>{{ label }}</span>
+  </a>
+{% endmacro %}
+

@@ -1,0 +1,45 @@
+{% macro heatmap_calendar(heatmap, class_name="", title="Mapa de estudos", activity_label="estudos") %}
+  <article class="card heatmap-card {{ class_name }}">
+    <header class="section-card-header">
+      <div>
+        <p class="card-label">Histórico mensal</p>
+        <h2 class="card-title">{{ title }}</h2>
+      </div>
+      <span class="visual-filter">{{ heatmap.month }}</span>
+    </header>
+
+    <div class="heatmap-weekdays" aria-hidden="true">
+      {% for weekday in heatmap.weekdays %}
+        <span>{{ weekday }}</span>
+      {% endfor %}
+    </div>
+
+    <div class="heatmap-grid" aria-label="Intensidade de {{ activity_label }} em {{ heatmap.month }}">
+      {% for _ in range(heatmap.leading_days) %}
+        <span class="heatmap-cell is-empty" aria-hidden="true"></span>
+      {% endfor %}
+      {% for item in heatmap.days %}
+        <button
+          class="heatmap-cell heatmap-level-{{ item.level }}{% if item.is_highlighted %} is-highlighted{% endif %}"
+          type="button"
+          aria-label="{{ item.title|default('Dia ' ~ item.day ~ ', intensidade ' ~ item.level ~ ' de 5') }}"
+          {% if item.title %}title="{{ item.title }}"{% endif %}
+          {% if item.date %}data-calendar-date="{{ item.date }}"{% endif %}
+        >
+          {{ item.day }}
+        </button>
+      {% endfor %}
+    </div>
+
+    <footer class="heatmap-footer">
+      <p>Clique em um dia para ver o detalhamento.</p>
+      <div class="heatmap-legend" aria-label="Legenda de intensidade">
+        <span>Menos</span>
+        {% for level in range(6) %}
+          <i class="heatmap-level-{{ level }}" aria-hidden="true"></i>
+        {% endfor %}
+        <span>Mais</span>
+      </div>
+    </footer>
+  </article>
+{% endmacro %}

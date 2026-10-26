@@ -1,0 +1,85 @@
+{% set primary_navigation = [
+  ("home", "main.home", "house", "Início"),
+  ("estudo", "main.estudo", "book-open", "Estudo"),
+  ("treino", "main.treino", "dumbbell", "Treino"),
+  ("sono", "main.sono", "moon-star", "Sono"),
+  ("computador", "main.computador", "monitor", "Uso do computador"),
+  ("alimentacao", "main.alimentacao", "apple", "Alimentação"),
+  ("historico", "main.historico", "history", "Histórico")
+] %}
+{% set secondary_navigation = [
+  ("configuracoes", "main.configuracoes", "settings-2", "Configurações"),
+  ("perfil", "main.perfil", "user-round", "Perfil")
+] %}
+
+<aside class="sidebar" aria-label="Navegação principal">
+  <a class="brand" href="{{ url_for('main.home') }}" aria-label="Condution Time — Início">
+    <span class="brand-mark" aria-hidden="true">
+      <i data-lucide="sparkles"></i>
+    </span>
+    <span class="brand-copy">
+      <strong>Condution</strong>
+      <span>Time</span>
+    </span>
+  </a>
+
+  <nav class="sidebar-navigation" aria-label="Seções do aplicativo">
+    <ul class="navigation-list">
+      {% for key, endpoint, icon, label in primary_navigation %}
+        <li>
+          <a
+            class="navigation-item{% if active_page == key %} is-active{% endif %}"
+            href="{{ url_for(endpoint) }}"
+            {% if active_page == key %}aria-current="page"{% endif %}
+            title="{{ label }}"
+          >
+            <i data-lucide="{{ icon }}" aria-hidden="true"></i>
+            <span>{{ label }}</span>
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+
+    <a
+      class="register-button{% if active_page == 'registrar' %} is-active{% endif %}"
+      href="{{ url_for('main.registrar') }}"
+      {% if active_page == "registrar" %}aria-current="page"{% endif %}
+      title="Registrar algo que já aconteceu"
+    >
+      <span class="register-icon">
+        <i data-lucide="clipboard-plus" aria-hidden="true"></i>
+      </span>
+      <span>Registrar</span>
+    </a>
+
+    <a
+      class="session-button{% if active_page == 'sessao' %} is-active{% endif %}"
+      href="{{ url_for('main.sessao') }}"
+      {% if active_page == "sessao" %}aria-current="page"{% endif %}
+      title="Iniciar uma atividade agora"
+    >
+      <span class="session-icon">
+        <i data-lucide="play" aria-hidden="true"></i>
+      </span>
+      <span>Iniciar sessão</span>
+    </a>
+  </nav>
+
+  <nav class="sidebar-footer" aria-label="Conta e preferências">
+    <ul class="navigation-list">
+      {% for key, endpoint, icon, label in secondary_navigation %}
+        <li>
+          <a
+            class="navigation-item{% if active_page == key %} is-active{% endif %}"
+            href="{{ url_for(endpoint) }}"
+            {% if active_page == key %}aria-current="page"{% endif %}
+            title="{{ label }}"
+          >
+            <i data-lucide="{{ icon }}" aria-hidden="true"></i>
+            <span>{{ label }}</span>
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  </nav>
+</aside>

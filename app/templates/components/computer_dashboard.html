@@ -1,0 +1,174 @@
+{% from "components/score_card.html" import score_card %}
+{% from "components/metric_card.html" import metric_card %}
+{% from "components/activity_list_card.html" import activity_list_card %}
+{% from "components/stacked_chart_card.html" import stacked_chart_card %}
+{% from "components/progress_list.html" import progress_list %}
+{% from "components/action_card.html" import action_card %}
+{% from "components/heatmap_calendar.html" import heatmap_calendar %}
+
+{% macro computer_dashboard(data) %}
+  <section
+    class="dashboard-grid study-dashboard computer-dashboard"
+    aria-label="Painel de uso do computador"
+  >
+    {{ score_card(
+      data.score,
+      data.score_title,
+      "Visão geral",
+      "grid-span-4 study-score-card computer-score-card"
+    ) }}
+
+    <section class="study-metrics-grid grid-span-8" aria-label="Métricas de uso do computador">
+      {% for metric in data.metrics %}
+        {{ metric_card(
+          metric.title,
+          metric.value,
+          metric.helper,
+          metric.icon,
+          metric.theme,
+          "study-metric-card",
+          "",
+          metric.helper_tone,
+          metric.secondary_helper
+        ) }}
+      {% endfor %}
+    </section>
+
+    {{ activity_list_card(
+      "Atividades no computador",
+      data.activities,
+      "Ver todas as atividades",
+      "grid-span-3 study-detail-card"
+    ) }}
+
+    {{ stacked_chart_card(
+      data.weekly_usage,
+      "grid-span-5 study-detail-card"
+    ) }}
+
+    {{ progress_list(
+      data.categories.title,
+      data.categories["items"],
+      data.categories.link_label,
+      "grid-span-4 study-detail-card"
+    ) }}
+
+    {{ action_card(
+      "#computer-monitor-toggle",
+      "#application-rules",
+      data.monitored_session.title,
+      data.monitored_session.subtitle,
+      "Monitoramento",
+      data.monitored_session.icon,
+      "grid-span-6 study-action-card computer-session-card",
+      data.monitored_session.primary_label,
+      data.monitored_session.secondary_label,
+      data.monitored_session
+    ) }}
+
+    {{ heatmap_calendar(
+      data.heatmap,
+      "grid-span-6 computer-heatmap-card",
+      data.heatmap.title,
+      data.heatmap.activity_label
+    ) }}
+  </section>
+
+  <section
+    class="card computer-rules-card"
+    id="application-rules"
+    data-monitor-status="{{ data.monitor_status.status }}"
+  >
+    <header class="section-card-header">
+      <div>
+        <p class="card-label">Classificação local</p>
+        <h2 class="card-title">Regras de aplicativos</h2>
+      </div>
+      <span class="visual-filter">{{ data.applications|length }} aplicativo(s) na data selecionada</span>
+    </header>
+    <p class="computer-privacy-note">
+      Somente o nome do aplicativo, horário, duração e classificação são registrados.
+      Nenhuma tecla, tela, áudio, URL ou título de janela é armazenado.
+    </p>
+    <div class="computer-rules-list">
+      {% for app in data.applications %}
+        <article
+          class="computer-rule-row"
+          data-executable="{{ app.executable_name }}"
+          data-rule-id="{{ app.manual_rule.id if app.manual_rule else '' }}"
+        >
+          <div>
+            <strong>{{ app.friendly_name }}</strong>
+            <span>{{ app.executable_name }} • {{ app.duration_seconds // 60 }} min</span>
+          </div>
+          <select class="computer-rule-classification" aria-label="Classificação de {{ app.friendly_name }}">
+            {% for value, label in [
+              ("productive", "Produtivo"),
+              ("distracting", "Distração"),
+              ("neutral", "Neutro"),
+              ("ignored", "Ignorado")
+            ] %}
+              <option value="{{ value }}" {% if (app.manual_rule.classification if app.manual_rule else app.classification) == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+          <select class="computer-rule-category" aria-label="Categoria de {{ app.friendly_name }}">
+            {% for value, label in [
+              ("study", "Estudo"),
+              ("programming", "Programação"),
+              ("work", "Trabalho"),
+              ("communication", "Comunicação"),
+              ("entertainment", "Entretenimento"),
+              ("social", "Redes sociais"),
+              ("gaming", "Jogos"),
+              ("system", "Sistema"),
+              ("other", "Outro")
+            ] %}
+              <option value="{{ value }}" {% if (app.manual_rule.category if app.manual_rule else app.category) == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+          <button class="button computer-rule-save" type="button">Salvar</button>
+        </article>
+      {% else %}
+        <p class="study-inline-empty">
+          Os aplicativos aparecerão aqui após os primeiros blocos monitorados.
+        </p>
+      {% endfor %}
+    </div>
+    <p class="settings-feedback" id="computer-feedback" aria-live="polite"></p>
+  </section>
+
+  <section class="card computer-rules-card" id="project-rules">
+    <header class="section-card-header">
+      <div>
+        <p class="card-label">Contexto privado</p>
+        <h2 class="card-title">Projetos monitorados</h2>
+      </div>
+      <span class="visual-filter">{{ data.projects|length }} projeto(s)</span>
+    </header>
+    <p class="computer-privacy-note">
+      O título é lido momentaneamente somente no VS Code, Cursor ou VSCodium.
+      Apenas projetos reconhecidos são salvos; arquivos, caminhos e títulos desconhecidos são descartados.
+    </p>
+    <p class="computer-privacy-note">
+      ChatGPT hoje: desktop {{ data.context_totals.chatgpt_desktop_seconds // 60 }} min ·
+      navegador {{ data.context_totals.chatgpt_browser_seconds // 60 }} min.
+    </p>
+    <div class="computer-rules-list" id="project-rules-list">
+      {% for project in data.projects %}
+        <article class="computer-rule-row computer-project-row" data-project-id="{{ project.id }}">
+          <div>
+            <strong>{{ project.display_name }}</strong>
+            <span>{{ project.match_terms|join(", ") }} · {{ project.today_seconds // 60 }} min hoje · {{ project.total_seconds // 60 }} min total</span>
+          </div>
+          <span class="badge">{{ "Ativo" if project.enabled else "Pausado" }}</span>
+          <button class="button computer-project-delete" type="button">Excluir regra</button>
+        </article>
+      {% endfor %}
+    </div>
+    <form id="project-rule-form" class="computer-project-form">
+      <input name="display_name" maxlength="150" placeholder="Nome do projeto" required>
+      <input name="match_terms" placeholder="termo 1, termo 2" required>
+      <button class="button button-primary" type="submit">Adicionar projeto</button>
+    </form>
+  </section>
+{% endmacro %}

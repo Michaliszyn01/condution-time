@@ -1,0 +1,20 @@
+{% macro registration_rating_selector(name, label, options, default_value="", describedby="") %}
+  <fieldset class="registration-fieldset"{% if describedby %} aria-describedby="{{ describedby }}"{% endif %}>
+    <legend>{{ label }}</legend>
+    <div class="registration-rating-options">
+      {% for option in options %}
+        <label for="{{ name }}-option-{{ loop.index0 }}">
+          <input
+            id="{{ name }}-option-{{ loop.index0 }}"
+            class="registration-visually-hidden"
+            type="radio"
+            name="{{ name }}"
+            value="{{ option }}"
+            {% if option == default_value %}checked{% endif %}
+          >
+          <span>{{ option }}</span>
+        </label>
+      {% endfor %}
+    </div>
+  </fieldset>
+{% endmacro %}

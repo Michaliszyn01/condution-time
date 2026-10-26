@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+{% from "components/card.html" import card %}
+{% from "components/badge.html" import badge %}
+{% from "components/score_card.html" import score_card %}
+{% from "components/consistency_card.html" import consistency_card %}
+{% from "components/category_card.html" import category_card %}
+{% from "components/action_card.html" import action_card %}
+{% from "components/icon_badge.html" import icon_badge %}
+{% from "components/button.html" import button %}
+
+{% block title %}Início{% endblock %}
+
+{% block page_styles %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/home.css') }}">
+{% endblock %}
+
+{% block content %}
+  <section class="dashboard-grid" aria-label="Resumo do dia">
+    {{ score_card(home_page_data.score) }}
+
+    {{ consistency_card(home_page_data.consistency) }}
+
+    {% call card(
+      "Feitos de hoje",
+      "",
+      "circle-check-big",
+      "green",
+      "grid-span-4 daily-card",
+      "Seu dia"
+    ) %}
+      {% if home_page_data.accomplishments %}
+        <ul class="home-activity-list">
+          {% for item in home_page_data.accomplishments %}
+            <li>
+              <a href="{{ item.href if item.href is defined else url_for(item.endpoint) }}">
+                {{ icon_badge(item.icon, item.theme) }}
+                <span>
+                  <strong>{{ item.text }}</strong>
+                  <small>{{ item.category }}</small>
+                </span>
+                <time datetime="{{ home_page_data.today.date }}T{{ item.time }}">{{ item.time }}</time>
+              </a>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <div class="compact-status">
+          <strong>Nenhum registro hoje</strong>
+          <p>Comece registrando uma atividade ou iniciando uma sessão.</p>
+        </div>
+        <div class="empty-actions">
+          {{ button("Registrar", url_for("main.registrar"), "secondary", "plus") }}
+          {{ button("Iniciar sessão", url_for("main.sessao"), "secondary", "play") }}
+        </div>
+      {% endif %}
+    {% endcall %}
+
+    {% call card(
+      "Ontem",
+      "",
+      "history",
+      "purple",
+      "grid-span-3 yesterday-card",
+      "Resumo"
+    ) %}
+      <div class="compact-status">
+        <strong>{{ home_page_data.yesterday_summary.title }}</strong>
+        {% if home_page_data.yesterday_summary.available %}
+          <ul class="yesterday-summary-list">
+          {% for item in home_page_data.yesterday_summary["items"] %}
+              <li>{{ item }}</li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p>Registre suas atividades para formar o próximo resumo.</p>
+        {% endif %}
+      </div>
+    {% endcall %}
+
+    {% call card(
+      "Calendário",
+      "",
+      "calendar-days",
+      "blue",
+      "grid-span-5 calendar-card",
+      home_page_data.calendar.month
+    ) %}
+      <div class="calendar-preview" aria-label="Pontuação diária de {{ home_page_data.calendar.month }}">
+        <div class="calendar-weekdays" aria-hidden="true">
+          {% for day in home_page_data.calendar.weekdays %}
+            <span>{{ day }}</span>
+          {% endfor %}
+        </div>
+        <div class="calendar-days">
+          {% for _ in range(home_page_data.calendar.leading_days) %}
+            <span class="is-empty" aria-hidden="true"></span>
+          {% endfor %}
+          {% for day in home_page_data.calendar.days %}
+            <span
+              class="calendar-level-{{ day.level }}{% if day.is_highlighted %} is-today{% endif %}"
+              title="{{ day.title }}"
+              aria-label="{{ day.title }}"
+            >{{ day.day }}</span>
+          {% endfor %}
+        </div>
+      </div>
+    {% endcall %}
+
+    <section class="categories-section grid-span-12" aria-labelledby="categories-title">
+      <header class="section-heading">
+        <div>
+          <p class="section-eyebrow">Sua rotina</p>
+          <h2 id="categories-title">Áreas do seu dia</h2>
+        </div>
+        <span class="section-note">Visão geral</span>
+      </header>
+
+      <div class="category-grid">
+        {% for category in home_page_data.categories %}
+          {{ category_card(category, url_for(category.endpoint)) }}
+        {% endfor %}
+      </div>
+    </section>
+
+    {% if home_page_data.cta.primary_href is defined %}
+      {% set primary_href = home_page_data.cta.primary_href %}
+    {% else %}
+      {% set primary_href = url_for(home_page_data.cta.primary_endpoint) %}
+    {% endif %}
+    {{ action_card(
+      primary_href,
+      url_for(home_page_data.cta.secondary_endpoint),
+      title=home_page_data.cta.title,
+      description=home_page_data.cta.description,
+      primary_label=home_page_data.cta.primary_label,
+      secondary_label=home_page_data.cta.secondary_label
+    ) }}
+  </section>
+{% endblock %}

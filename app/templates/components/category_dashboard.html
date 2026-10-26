@@ -1,0 +1,82 @@
+{% from "components/score_card.html" import score_card %}
+{% from "components/metric_card.html" import metric_card %}
+{% from "components/list_card.html" import list_card %}
+{% from "components/weekly_chart_card.html" import weekly_chart_card %}
+{% from "components/progress_list.html" import progress_list %}
+{% from "components/action_card.html" import action_card %}
+{% from "components/heatmap_calendar.html" import heatmap_calendar %}
+
+{% macro category_dashboard(data, theme, aria_label, primary_href) %}
+  <section
+    class="dashboard-grid study-dashboard category-dashboard"
+    aria-label="{{ aria_label }}"
+    data-chart-theme="{{ theme }}"
+  >
+    {{ score_card(
+      data.score,
+      data.score_title,
+      "Visão geral",
+      "grid-span-4 study-score-card theme-" ~ theme
+    ) }}
+
+    <section class="study-metrics-grid grid-span-8" aria-label="Métricas da categoria">
+      {% for metric in data.metrics %}
+        {{ metric_card(
+          metric.title,
+          metric.value,
+          metric.helper,
+          metric.icon,
+          metric.theme,
+          "study-metric-card",
+          "",
+          metric.helper_tone,
+          metric.secondary_helper
+        ) }}
+      {% endfor %}
+    </section>
+
+    {{ list_card(
+      data["list"]["title"],
+      data["list"]["items"],
+      data["list"]["link_label"],
+      "grid-span-3 study-detail-card",
+      data["list"].link_href|default("#"),
+      data["list"].empty|default(none)
+    ) }}
+
+    {{ weekly_chart_card(
+      data.weekly,
+      "grid-span-5 study-detail-card",
+      data.weekly.title
+    ) }}
+
+    {{ progress_list(
+      data["progress"]["title"],
+      data["progress"]["items"],
+      data["progress"]["link_label"],
+      "grid-span-4 study-detail-card",
+      data["progress"].empty_text|default("")
+    ) }}
+
+    {{ action_card(
+      data.action.primary_href|default(primary_href),
+      "#",
+      data.action.title,
+      data.action.subtitle,
+      "Planejamento",
+      data.action.icon,
+      "grid-span-6 study-action-card theme-" ~ theme,
+      data.action.primary_label,
+      data.action.secondary_label,
+      data.action,
+      data.action.status
+    ) }}
+
+    {{ heatmap_calendar(
+      data.heatmap,
+      "grid-span-6 theme-" ~ theme,
+      data.heatmap.title,
+      data.heatmap.activity_label
+    ) }}
+  </section>
+{% endmacro %}

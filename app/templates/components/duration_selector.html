@@ -1,0 +1,53 @@
+{% macro duration_selector(durations, default_duration) %}
+  <fieldset class="session-fieldset" aria-describedby="session-duration-error">
+    <legend>Meta de duração</legend>
+    <p class="session-field-hint">Defina por quanto tempo você pretende manter o foco.</p>
+
+    <div class="duration-options">
+      {% for duration in durations %}
+        <label class="duration-option">
+          <input
+            class="session-visually-hidden"
+            type="radio"
+            name="session_duration"
+            value="{{ duration }}"
+            {% if duration == default_duration %}checked{% endif %}
+          >
+          <strong>{{ duration }}</strong>
+          <span>min</span>
+        </label>
+      {% endfor %}
+
+      <label class="duration-option duration-option--custom">
+        <input
+          class="session-visually-hidden"
+          type="radio"
+          name="session_duration"
+          value="custom"
+        >
+        <i data-lucide="sliders-horizontal" aria-hidden="true"></i>
+        <span>Personalizado</span>
+      </label>
+    </div>
+
+    <div class="custom-duration-field" data-custom-duration hidden>
+      <label for="custom-duration">Duração personalizada em minutos</label>
+      <div class="session-input-with-suffix">
+        <input
+          id="custom-duration"
+          name="custom_duration"
+          type="number"
+          min="1"
+          max="600"
+          inputmode="numeric"
+          placeholder="Ex.: 40"
+        >
+        <span>min</span>
+      </div>
+    </div>
+
+    <p class="session-field-error" id="session-duration-error" hidden>
+      Informe uma duração maior que zero.
+    </p>
+  </fieldset>
+{% endmacro %}

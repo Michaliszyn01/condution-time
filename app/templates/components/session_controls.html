@@ -1,0 +1,20 @@
+{% macro session_controls() %}
+  <div class="session-controls" role="group" aria-label="Controles da sessão">
+    <button class="button button--secondary" type="button" data-session-action="pause">
+      <i data-lucide="pause" aria-hidden="true"></i>
+      <span>Pausar</span>
+    </button>
+    <button class="button button--secondary" type="button" data-session-action="resume" hidden>
+      <i data-lucide="play" aria-hidden="true"></i>
+      <span>Continuar</span>
+    </button>
+    <button class="button session-finish-button" type="button" data-session-action="open-finish">
+      <i data-lucide="square" aria-hidden="true"></i>
+      <span>Finalizar sessão</span>
+    </button>
+    <button class="button session-cancel-button" type="button" data-session-action="open-cancel">
+      <i data-lucide="x" aria-hidden="true"></i>
+      <span>Cancelar sessão</span>
+    </button>
+  </div>
+{% endmacro %}

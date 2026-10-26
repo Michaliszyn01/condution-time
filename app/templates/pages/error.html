@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Erro local{% endblock %}
+
+{% block content %}
+  <section class="card local-error-card" aria-labelledby="local-error-title">
+    <span class="icon-badge icon-badge--orange" aria-hidden="true">
+      <i data-lucide="triangle-alert"></i>
+    </span>
+    <div>
+      <p class="card-label">Erro local</p>
+      <h2 id="local-error-title">Esta página encontrou um problema.</h2>
+      <p>
+        Seus dados permanecem no computador. Você pode voltar ao início ou
+        tentar abrir a página novamente.
+      </p>
+      <p class="local-error-code">
+        Código para diagnóstico: <strong>{{ error_code }}</strong>
+      </p>
+      <div class="local-error-actions">
+        <a class="button button--primary" href="{{ url_for('main.home') }}">
+          Voltar ao início
+        </a>
+        <button class="button button--secondary" type="button" onclick="window.location.reload()">
+          Tentar novamente
+        </button>
+      </div>
+    </div>
+  </section>
+{% endblock %}

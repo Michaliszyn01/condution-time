@@ -1,0 +1,241 @@
+{% extends "base.html" %}
+{% from "components/icon_badge.html" import icon_badge %}
+
+{% block title %}Histórico{% endblock %}
+
+{% block page_styles %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/history.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/register.css') }}">
+{% endblock %}
+
+{% block content %}
+  <div class="history-page" data-history-page data-api-base="/api/records">
+    <section class="history-summary-grid" aria-label="Resumo do histórico">
+      <article class="card history-summary-card">
+        {{ icon_badge("database", "blue") }}
+        <div>
+          <span>Total de registros</span>
+          <strong>{{ history_data.summary.total_records }}</strong>
+          <small>No período selecionado</small>
+        </div>
+      </article>
+      <article class="card history-summary-card">
+        {{ icon_badge("clock-3", "green") }}
+        <div>
+          <span>Tempo registrado</span>
+          <strong>{{ history_data.summary.duration }}</strong>
+          <small>Estudo, treino e sessões</small>
+        </div>
+      </article>
+      <article class="card history-summary-card">
+        {{ icon_badge("calendar-check-2", "purple") }}
+        <div>
+          <span>Dias ativos</span>
+          <strong>{{ history_data.summary.active_days }}</strong>
+          <small>Com ao menos um registro</small>
+        </div>
+      </article>
+      <article class="card history-summary-card">
+        {{ icon_badge("layers-3", "orange") }}
+        <div>
+          <span>Categoria mais registrada</span>
+          <strong>{{ history_data.summary.top_category }}</strong>
+          <small>{{ history_data.summary.top_category_count }} registro{% if history_data.summary.top_category_count != 1 %}s{% endif %}</small>
+        </div>
+      </article>
+    </section>
+
+    <form class="card history-filters" method="get" action="{{ url_for('main.historico') }}" data-history-filters>
+      <div class="history-filter-field">
+        <label for="history-category">Categoria</label>
+        <select id="history-category" name="categoria">
+          {% for value, label in history_data.categories %}
+            <option value="{{ value }}" {% if history_data.filters.category == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="history-filter-field">
+        <label for="history-period">Período</label>
+        <select id="history-period" name="periodo">
+          {% for value, label in history_data.periods %}
+            <option value="{{ value }}" {% if history_data.filters.period == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="history-filter-field history-filter-search">
+        <label for="history-search">Busca textual</label>
+        <input
+          id="history-search"
+          name="busca"
+          type="search"
+          maxlength="100"
+          value="{{ history_data.filters.query }}"
+          placeholder="Buscar por matéria, treino, refeição ou sessão..."
+        >
+      </div>
+      <div class="history-filter-field" data-session-status-filter>
+        <label for="history-status">Status da sessão</label>
+        <select id="history-status" name="status">
+          {% for value, label in history_data.session_statuses %}
+            <option value="{{ value }}" {% if history_data.filters.session_status == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="history-custom-dates" data-custom-dates {% if history_data.filters.period != "custom" %}hidden{% endif %}>
+        <div class="history-filter-field">
+          <label for="history-start">Data inicial</label>
+          <input id="history-start" name="inicio" type="date" value="{{ history_data.filters.start_date.isoformat() if history_data.filters.period == 'custom' else '' }}">
+        </div>
+        <div class="history-filter-field">
+          <label for="history-end">Data final</label>
+          <input id="history-end" name="fim" type="date" value="{{ history_data.filters.end_date.isoformat() if history_data.filters.period == 'custom' else '' }}">
+        </div>
+      </div>
+      {% if history_errors %}
+        <p class="history-filter-error" role="alert">
+          {{ history_errors.values()|first }}
+        </p>
+      {% endif %}
+      <div class="history-filter-actions">
+        <button class="button button--primary" type="submit">
+          <i data-lucide="search" aria-hidden="true"></i>
+          Aplicar filtros
+        </button>
+        <a class="button button--secondary" href="{{ url_for('main.historico') }}">Limpar</a>
+      </div>
+    </form>
+
+    {% if history_data.groups %}
+      <section class="history-results" aria-label="Registros encontrados">
+        {% for group in history_data.groups %}
+          <section class="history-group" aria-labelledby="history-date-{{ loop.index }}">
+            <header class="history-group-header">
+              <h2 id="history-date-{{ loop.index }}">{{ group.label }}</h2>
+              <span>{{ group["items"]|length }} nesta página</span>
+            </header>
+            <div class="history-list">
+              {% for item in group["items"] %}
+                <article
+                  class="card history-item"
+                  data-history-item
+                  data-record-type="{{ item.record_type }}"
+                  data-record-id="{{ item.record_id }}"
+                >
+                  {{ icon_badge(item.icon, item.theme) }}
+                  <div class="history-item-content">
+                    <div class="history-item-meta">
+                      <span>{{ item.category_label }}</span>
+                      <time datetime="{{ item.event_datetime }}">{{ item.time_label }}</time>
+                      {% if item.status_label %}
+                        <span class="badge history-status history-status--{{ item.status }}">{{ item.status_label }}</span>
+                      {% endif %}
+                    </div>
+                    <h3>{{ item.title }}</h3>
+                    <p>{{ item.summary }}</p>
+                  </div>
+                  <button
+                    class="button button--secondary history-detail-button"
+                    type="button"
+                    data-record-detail
+                    aria-label="Ver detalhes de {{ item.title }}"
+                  >
+                    Ver detalhes
+                  </button>
+                </article>
+              {% endfor %}
+            </div>
+          </section>
+        {% endfor %}
+      </section>
+
+      {% if history_data.pagination.total_pages > 1 %}
+        <nav class="history-pagination" aria-label="Paginação do histórico">
+          {% if history_data.pagination.has_previous %}
+            <a class="button button--secondary" href="{{ url_for('main.historico') }}?{{ history_data.pagination.base_query }}&amp;page={{ history_data.pagination.page - 1 }}">Anterior</a>
+          {% endif %}
+          {% for page_number in history_data.pagination.page_numbers %}
+            <a
+              class="history-page-link{% if page_number == history_data.pagination.page %} is-current{% endif %}"
+              href="{{ url_for('main.historico') }}?{{ history_data.pagination.base_query }}&amp;page={{ page_number }}"
+              {% if page_number == history_data.pagination.page %}aria-current="page"{% endif %}
+            >{{ page_number }}</a>
+          {% endfor %}
+          {% if history_data.pagination.has_next %}
+            <a class="button button--secondary" href="{{ url_for('main.historico') }}?{{ history_data.pagination.base_query }}&amp;page={{ history_data.pagination.page + 1 }}">Próxima</a>
+          {% endif %}
+        </nav>
+      {% endif %}
+    {% else %}
+      <section class="card history-empty">
+        {{ icon_badge("search-x", "blue") }}
+        <h2>Nenhum registro encontrado</h2>
+        <p>Altere os filtros ou adicione uma nova atividade.</p>
+        <div>
+          <a class="button button--secondary" href="{{ url_for('main.historico') }}">Limpar filtros</a>
+          <a class="button button--primary" href="{{ url_for('main.registrar') }}">Registrar atividade</a>
+        </div>
+      </section>
+    {% endif %}
+
+    <p class="history-toast" role="status" aria-live="polite" data-history-toast hidden></p>
+  </div>
+
+  <div class="history-modal-backdrop" data-detail-modal hidden>
+    <section class="history-modal history-detail-modal" role="dialog" aria-modal="true" aria-labelledby="history-detail-title" tabindex="-1">
+      <button class="history-modal-close" type="button" data-modal-close aria-label="Fechar detalhes">
+        <i data-lucide="x" aria-hidden="true"></i>
+      </button>
+      <p class="card-label" data-detail-category>Registro</p>
+      <h2 id="history-detail-title" data-detail-title>Detalhes do registro</h2>
+      <div class="history-detail-grid" data-detail-fields></div>
+      <p class="history-readonly-note" data-session-readonly hidden>
+        Esta sessão é somente leitura e foi preservada por afetar o bônus e o histórico.
+      </p>
+      <div class="history-modal-actions">
+        <button class="button button--secondary" type="button" data-modal-close>Fechar</button>
+        <button class="button button--secondary" type="button" data-edit-record>
+          <i data-lucide="pencil" aria-hidden="true"></i>Editar
+        </button>
+        <button class="button history-delete-button" type="button" data-delete-record>
+          <i data-lucide="trash-2" aria-hidden="true"></i>Excluir
+        </button>
+      </div>
+    </section>
+  </div>
+
+  <div class="history-modal-backdrop" data-edit-modal hidden>
+    <section class="history-modal history-edit-modal" role="dialog" aria-modal="true" aria-labelledby="history-edit-title" tabindex="-1">
+      <button class="history-modal-close" type="button" data-edit-close aria-label="Fechar edição">
+        <i data-lucide="x" aria-hidden="true"></i>
+      </button>
+      <p class="card-label">Editar registro</p>
+      <h2 id="history-edit-title">Atualizar informações</h2>
+      <form class="history-edit-form registration-form-grid" data-edit-form novalidate></form>
+      <p class="history-form-error" role="alert" data-edit-error hidden></p>
+      <div class="history-modal-actions">
+        <button class="button button--secondary" type="button" data-edit-close>Cancelar</button>
+        <button class="button button--primary" type="submit" form="history-dynamic-form" data-edit-save>Salvar alterações</button>
+      </div>
+    </section>
+  </div>
+
+  <div class="history-modal-backdrop" data-delete-modal hidden>
+    <section class="history-modal" role="dialog" aria-modal="true" aria-labelledby="history-delete-title" tabindex="-1">
+      <button class="history-modal-close" type="button" data-delete-close aria-label="Fechar confirmação">
+        <i data-lucide="x" aria-hidden="true"></i>
+      </button>
+      <span class="icon-badge icon-badge--orange" aria-hidden="true"><i data-lucide="trash-2"></i></span>
+      <h2 id="history-delete-title">Excluir este registro?</h2>
+      <p><strong data-delete-title></strong></p>
+      <p>Essa ação removerá o registro e poderá alterar sua pontuação do dia.</p>
+      <div class="history-modal-actions">
+        <button class="button button--secondary" type="button" data-delete-close>Cancelar</button>
+        <button class="button history-delete-button" type="button" data-delete-confirm>Excluir registro</button>
+      </div>
+    </section>
+  </div>
+{% endblock %}
+
+{% block page_scripts %}
+  <script src="{{ url_for('static', filename='js/history.js') }}"></script>
+{% endblock %}

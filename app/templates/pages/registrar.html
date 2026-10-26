@@ -1,0 +1,595 @@
+{% extends "base.html" %}
+{% from "components/registration_category_selector.html" import registration_category_selector %}
+{% from "components/registration_rating_selector.html" import registration_rating_selector %}
+{% from "components/registration_duration_fields.html" import registration_duration_fields %}
+{% from "components/registration_conditional_field.html" import registration_conditional_field %}
+{% from "components/registration_summary.html" import registration_summary %}
+
+{% block title %}Registrar{% endblock %}
+
+{% block page_styles %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/register.css') }}">
+{% endblock %}
+
+{% block content %}
+  <div class="registration-page" data-registration-page>
+    <p class="registration-date-banner" role="status">
+      <i data-lucide="calendar-days" aria-hidden="true"></i>
+      Registrando para: <strong data-registering-date>{{ register_options.selected_date_label }}</strong>
+    </p>
+    <section
+      class="registration-state"
+      data-registration-state="categories"
+      aria-label="Escolha da categoria"
+    >
+      <header class="registration-intro">
+        <p class="section-eyebrow">Adicionar ao seu dia</p>
+        <h2>O que você deseja registrar?</h2>
+        <p>Escolha algo que já aconteceu. As informações serão salvas no banco local.</p>
+      </header>
+      {{ registration_category_selector(register_options.categories) }}
+    </section>
+
+    <section
+      class="registration-state"
+      data-registration-state="form"
+      aria-label="Formulário de registro"
+      hidden
+    >
+      <button class="registration-back-button" type="button" data-back-categories>
+        <i data-lucide="arrow-left" aria-hidden="true"></i>
+        Voltar para categorias
+      </button>
+
+      <div class="dashboard-grid registration-form-layout">
+        <form class="card registration-form grid-span-8" data-register-form="study" novalidate hidden>
+          <header class="registration-form-header">
+            <span class="icon-badge icon-badge--blue" aria-hidden="true">
+              <i data-lucide="book-open"></i>
+            </span>
+            <div>
+              <p class="card-label">Estudo</p>
+              <h2>Registrar estudo</h2>
+              <p>Adicione o que você estudou e como foi seu desempenho.</p>
+            </div>
+          </header>
+
+          <div class="registration-form-grid">
+            <div class="registration-field">
+              <label for="study-date">Data do registro</label>
+              <input id="study-date" name="study_date" type="date" value="{{ register_options.selected_date }}" max="{{ register_options.today }}" required>
+            </div>
+            <div class="registration-field">
+              <label for="study-subject">Matéria</label>
+              <select id="study-subject" name="study_subject" required>
+                {% for subject in register_options.study_subjects %}
+                  <option value="{{ subject }}">{{ subject }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="registration-field registration-field--wide">
+              <label for="study-topic">Qual assunto você estudou?</label>
+              <input
+                id="study-topic"
+                name="study_topic"
+                type="text"
+                placeholder="Ex.: Geometria plana"
+                required
+                aria-describedby="study-topic-error"
+              >
+              <p class="registration-error" id="study-topic-error" data-field-error hidden>
+                Informe o assunto estudado.
+              </p>
+            </div>
+
+            <div class="registration-field registration-field--wide">
+              {{ registration_duration_fields("study", "Tempo estudado", 0, 0) }}
+            </div>
+
+            <div class="registration-field">
+              <label for="study-questions">Quantidade de questões <span>Opcional</span></label>
+              <input id="study-questions" name="study_questions" type="number" min="0">
+            </div>
+
+            <div class="registration-field">
+              <label for="study-correct">Quantidade de acertos <span>Opcional</span></label>
+              <input
+                id="study-correct"
+                name="study_correct"
+                type="number"
+                min="0"
+                aria-describedby="study-correct-error"
+              >
+              <p class="registration-error" id="study-correct-error" data-field-error hidden>
+                Os acertos não podem superar a quantidade de questões.
+              </p>
+            </div>
+
+            <div class="registration-field registration-field--wide">
+              {{ registration_rating_selector(
+                "study_focus",
+                "Qualidade do foco",
+                register_options.focus_ratings,
+                "Boa"
+              ) }}
+            </div>
+
+            <div class="registration-field registration-field--wide">
+              <label for="study-learned">O que aprendeu?</label>
+              <textarea
+                id="study-learned"
+                name="study_learned"
+                rows="3"
+                placeholder="Descreva o principal aprendizado da sessão."
+              ></textarea>
+            </div>
+
+            <div class="registration-field registration-field--wide">
+              <label for="study-difficulty">Dificuldade encontrada <span>Opcional</span></label>
+              <textarea id="study-difficulty" name="study_difficulty" rows="3"></textarea>
+            </div>
+
+            <div class="registration-field registration-field--wide">
+              {{ registration_rating_selector(
+                "study_origin",
+                "Origem do registro",
+                register_options.study_origins,
+                "Estudo manual"
+              ) }}
+            </div>
+          </div>
+
+          <div class="registration-form-actions">
+            <button class="button button--primary" type="submit">
+              <i data-lucide="clipboard-check" aria-hidden="true"></i>
+              <span>Registrar estudo</span>
+            </button>
+            <button class="button button--secondary" type="button" data-register-cancel>
+              Cancelar
+            </button>
+          </div>
+        </form>
+
+        <form class="card registration-form grid-span-8" data-register-form="sleep" novalidate hidden>
+          <header class="registration-form-header">
+            <span class="icon-badge icon-badge--purple" aria-hidden="true">
+              <i data-lucide="moon-star"></i>
+            </span>
+            <div>
+              <p class="card-label">Sono</p>
+              <h2>Registrar sono</h2>
+              <p>Adicione os horários e como você se sentiu ao acordar.</p>
+            </div>
+          </header>
+          <button class="watch-source-card" type="button" data-open-watch="sleep">
+            <i data-lucide="watch" aria-hidden="true"></i>
+            <span><strong>Usar dados do relógio</strong><small>Complete como você se sentiu sem duplicar o sono importado.</small></span>
+            <i data-lucide="chevron-right" aria-hidden="true"></i>
+          </button>
+          <input type="hidden" name="watch_record_id">
+
+          <div class="registration-form-grid">
+            <div class="registration-field">
+              <label for="sleep-date">Data do sono <span>(dia em que acordou)</span></label>
+              <input
+                id="sleep-date"
+                name="sleep_date"
+                type="date"
+                value="{{ register_options.today }}"
+                max="{{ register_options.today }}"
+                required
+                aria-describedby="sleep-form-error"
+              >
+            </div>
+            <div class="registration-field">
+              <label for="sleep-start">Horário em que dormiu</label>
+              <input
+                id="sleep-start"
+                name="sleep_start"
+                type="time"
+                value="{{ register_options.current_time }}"
+                required
+                aria-describedby="sleep-form-error"
+              >
+            </div>
+            <div class="registration-field">
+              <label for="sleep-end">Horário em que acordou</label>
+              <input
+                id="sleep-end"
+                name="sleep_end"
+                type="time"
+                value="{{ register_options.current_time }}"
+                required
+                aria-describedby="sleep-form-error"
+              >
+            </div>
+            <div class="registration-duration-preview" aria-live="polite">
+              <span>Duração calculada</span>
+              <strong data-sleep-duration>—</strong>
+              <small>Horários que atravessam a meia-noite são considerados.</small>
+            </div>
+
+            <div class="registration-field registration-field--wide">
+              {{ registration_rating_selector(
+                "sleep_quality",
+                "Qualidade percebida",
+                register_options.sleep_qualities,
+                "Boa"
+              ) }}
+            </div>
+
+            <div class="registration-field">
+              <label for="sleep-awakenings">Quantas vezes acordou durante a noite?</label>
+              <input id="sleep-awakenings" name="sleep_awakenings" type="number" min="0" value="2">
+            </div>
+
+            <div class="registration-field registration-field--wide">
+              {{ registration_rating_selector(
+                "sleep_rested",
+                "Acordou descansado?",
+                register_options.rested_options,
+                "Sim"
+              ) }}
+            </div>
+
+            <div class="registration-field registration-field--wide">
+              <label for="sleep-notes">Observações <span>Opcional</span></label>
+              <textarea id="sleep-notes" name="sleep_notes" rows="3"></textarea>
+            </div>
+
+            <fieldset class="registration-fieldset registration-field--wide">
+              <legend>Origem do registro</legend>
+              <div class="registration-rating-options">
+                {% for origin in register_options.sleep_origins %}
+                  <label
+                    class="{% if origin.disabled %}is-disabled{% endif %}"
+                    for="sleep-origin-option-{{ loop.index0 }}"
+                  >
+                    <input
+                      id="sleep-origin-option-{{ loop.index0 }}"
+                      class="registration-visually-hidden"
+                      type="radio"
+                      name="sleep_origin"
+                      value="{{ origin.label }}"
+                      {% if not origin.disabled %}checked{% endif %}
+                      {% if origin.disabled %}disabled{% endif %}
+                    >
+                    <span>
+                      {{ origin.label }}
+                      {% if origin.disabled %}<em>Em breve</em>{% endif %}
+                    </span>
+                  </label>
+                {% endfor %}
+              </div>
+            </fieldset>
+          </div>
+
+          <p
+            class="registration-error registration-form-error"
+            id="sleep-form-error"
+            data-form-error
+            hidden
+          >
+            Preencha os campos obrigatórios.
+          </p>
+          <div class="registration-form-actions">
+            <button class="button button--primary" type="submit">
+              <i data-lucide="clipboard-check" aria-hidden="true"></i>
+              <span>Registrar sono</span>
+            </button>
+            <button class="button button--secondary" type="button" data-register-cancel>
+              Cancelar
+            </button>
+          </div>
+        </form>
+
+        <form class="card registration-form grid-span-8" data-register-form="training" novalidate hidden>
+          <header class="registration-form-header">
+            <span class="icon-badge icon-badge--green" aria-hidden="true">
+              <i data-lucide="dumbbell"></i>
+            </span>
+            <div>
+              <p class="card-label">Treino</p>
+              <h2>Registrar treino</h2>
+              <p>Adicione sua atividade física e como foi o desempenho.</p>
+            </div>
+          </header>
+          <button class="watch-source-card" type="button" data-open-watch="training">
+            <i data-lucide="watch" aria-hidden="true"></i>
+            <span><strong>Usar dados do relógio</strong><small>Use métricas objetivas do Galaxy Watch e complete sua percepção.</small></span>
+            <i data-lucide="chevron-right" aria-hidden="true"></i>
+          </button>
+          <input type="hidden" name="watch_record_id">
+
+          <div class="registration-form-grid">
+            <div class="registration-field">
+              <label for="training-date">Data do registro</label>
+              <input id="training-date" name="training_date" type="date" value="{{ register_options.selected_date }}" max="{{ register_options.today }}" required>
+            </div>
+            <div class="registration-field">
+              <label for="training-type">Tipo de treino</label>
+              <select id="training-type" name="training_type" required>
+                {% for type in register_options.training_types %}
+                  <option value="{{ type.value }}">{{ type.label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="registration-field">
+              <label for="training-name">Nome do treino ou atividade</label>
+              <input
+                id="training-name"
+                name="training_name"
+                type="text"
+                placeholder="Ex.: Peito e tríceps ou Corrida 5 km"
+                required
+                aria-describedby="training-name-error"
+              >
+              <p class="registration-error" id="training-name-error" data-field-error hidden>
+                Informe o nome da atividade.
+              </p>
+            </div>
+
+            <div class="registration-field registration-field--wide">
+              {{ registration_duration_fields("training", "Duração", 0, 0) }}
+            </div>
+
+            <div class="registration-field registration-field--wide">
+              <label for="training-intensity">
+                Intensidade percebida:
+                <strong><span data-intensity-value>8</span> — <span data-intensity-label>alta</span></strong>
+              </label>
+              <input
+                class="registration-range"
+                id="training-intensity"
+                name="training_intensity"
+                type="range"
+                min="1"
+                max="10"
+                value="8"
+              >
+              <div class="registration-range-scale" aria-hidden="true">
+                <span>1 • leve</span>
+                <span>10 • muito alta</span>
+              </div>
+            </div>
+
+            <div class="registration-field registration-field--wide">
+              {{ registration_rating_selector(
+                "training_performance",
+                "Desempenho percebido",
+                register_options.performance_ratings,
+                "Muito bom"
+              ) }}
+            </div>
+
+            <div class="registration-field registration-field--wide">
+              <label for="training-exercises">Exercícios realizados</label>
+              <textarea
+                id="training-exercises"
+                name="training_exercises"
+                rows="3"
+                placeholder="Ex.: Supino reto, supino inclinado, tríceps pulley"
+              ></textarea>
+            </div>
+
+            <div class="registration-field registration-field--wide">
+              {{ registration_rating_selector(
+                "training_discomfort",
+                "Dor ou desconforto",
+                register_options.discomfort_levels,
+                "Nenhum"
+              ) }}
+            </div>
+
+            {{ registration_conditional_field(
+              "training-discomfort-location",
+              "training_discomfort_location",
+              "Onde sentiu desconforto?",
+              "Ex.: Ombro direito"
+            ) }}
+
+            <div class="registration-field registration-field--wide">
+              <label for="training-notes">Observações <span>Opcional</span></label>
+              <textarea id="training-notes" name="training_notes" rows="3"></textarea>
+            </div>
+          </div>
+
+          <div class="registration-form-actions">
+            <button class="button button--primary" type="submit">
+              <i data-lucide="clipboard-check" aria-hidden="true"></i>
+              <span>Registrar treino</span>
+            </button>
+            <button class="button button--secondary" type="button" data-register-cancel>
+              Cancelar
+            </button>
+          </div>
+        </form>
+
+        <form class="card registration-form grid-span-8" data-register-form="nutrition" novalidate hidden>
+          <header class="registration-form-header">
+            <span class="icon-badge icon-badge--orange" aria-hidden="true">
+              <i data-lucide="utensils"></i>
+            </span>
+            <div>
+              <p class="card-label">Alimentação</p>
+              <h2>Registrar alimentação</h2>
+              <p>Adicione uma refeição ou informações de hidratação.</p>
+            </div>
+          </header>
+          <div class="registration-field">
+            <label for="nutrition-date">Data do registro</label>
+            <input id="nutrition-date" name="nutrition_date" type="date" value="{{ register_options.selected_date }}" max="{{ register_options.today }}" required>
+          </div>
+
+          <div class="registration-field registration-mode-selector">
+            {{ registration_rating_selector(
+              "nutrition_mode",
+              "O que deseja registrar?",
+              register_options.nutrition_modes,
+              "Refeição"
+            ) }}
+          </div>
+
+          <div class="registration-form-grid" data-nutrition-panel="meal">
+            <div class="registration-field">
+              <label for="meal-type">Tipo de refeição</label>
+              <select id="meal-type" name="meal_type">
+                {% for type in register_options.meal_types %}
+                  <option value="{{ type }}" {% if type == "Almoço" %}selected{% endif %}>{{ type }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="registration-field">
+              <label for="meal-time">Horário</label>
+              <input id="meal-time" name="meal_time" type="time" value="{{ register_options.current_time }}">
+            </div>
+            <div class="registration-field registration-field--wide">
+              <label for="meal-foods">Alimentos consumidos</label>
+              <textarea
+                id="meal-foods"
+                name="meal_foods"
+                rows="3"
+                placeholder="Ex.: Frango, arroz, feijão e salada"
+                aria-describedby="meal-foods-error"
+              ></textarea>
+              <p class="registration-error" id="meal-foods-error" data-field-error hidden>
+                Informe os alimentos consumidos.
+              </p>
+            </div>
+            <div class="registration-field">
+              <label for="meal-amount">Quantidade aproximada <span>Opcional</span></label>
+              <input id="meal-amount" name="meal_amount" type="text" placeholder="Ex.: 1 prato médio">
+            </div>
+            <div class="registration-field registration-field--wide">
+              {{ registration_rating_selector(
+                "meal_protein",
+                "Teve fonte de proteína?",
+                register_options.yes_no_unknown,
+                "Sim"
+              ) }}
+            </div>
+            <div class="registration-field registration-field--wide">
+              {{ registration_rating_selector(
+                "meal_produce",
+                "Teve frutas ou verduras?",
+                register_options.yes_no_unknown,
+                "Sim"
+              ) }}
+            </div>
+            <div class="registration-field registration-field--wide">
+              {{ registration_rating_selector(
+                "meal_quality",
+                "Qualidade percebida",
+                register_options.meal_qualities,
+                "Boa"
+              ) }}
+            </div>
+            <div class="registration-field registration-field--wide">
+              <label for="meal-notes">Observações <span>Opcional</span></label>
+              <textarea id="meal-notes" name="meal_notes" rows="3"></textarea>
+            </div>
+          </div>
+
+          <div class="registration-form-grid" data-nutrition-panel="hydration" hidden>
+            <div class="registration-field">
+              <label for="water-amount">Quantidade de água</label>
+              <input
+                id="water-amount"
+                name="water_amount"
+                type="number"
+                min="0.1"
+                step="0.1"
+                value="500"
+                aria-describedby="water-amount-error"
+              >
+              <p class="registration-error" id="water-amount-error" data-field-error hidden>
+                Informe uma quantidade maior que zero.
+              </p>
+            </div>
+            <div class="registration-field">
+              <label for="water-unit">Unidade</label>
+              <select id="water-unit" name="water_unit">
+                {% for unit in register_options.water_units %}
+                  <option value="{{ unit }}">{{ unit }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="registration-field">
+              <label for="water-time">Horário</label>
+              <input id="water-time" name="water_time" type="time" value="{{ register_options.current_time }}">
+            </div>
+            <div class="registration-field registration-field--wide">
+              <label for="water-notes">Observação <span>Opcional</span></label>
+              <textarea id="water-notes" name="water_notes" rows="3"></textarea>
+            </div>
+          </div>
+
+          <div class="registration-form-actions">
+            <button class="button button--primary" type="submit">
+              <i data-lucide="clipboard-check" aria-hidden="true"></i>
+              <span data-nutrition-submit-label>Registrar refeição</span>
+            </button>
+            <button class="button button--secondary" type="button" data-register-cancel>
+              Cancelar
+            </button>
+          </div>
+        </form>
+
+        <aside class="card registration-side-card grid-span-4" aria-label="Resumo do formulário">
+          <header>
+            <span class="icon-badge icon-badge--blue" data-side-icon-wrap aria-hidden="true">
+              <i data-lucide="clipboard-plus" data-side-icon></i>
+            </span>
+            <div>
+              <p class="card-label">Registro manual</p>
+              <h2 data-side-category>Categoria</h2>
+            </div>
+          </header>
+
+          <div class="registration-side-progress">
+            <span>Campos obrigatórios</span>
+            <strong data-required-status>Preencha o formulário</strong>
+          </div>
+
+          <div class="registration-live-preview">
+            <p class="card-label">Resumo em tempo real</p>
+            <strong data-live-summary>As informações principais aparecerão aqui.</strong>
+          </div>
+
+          <div class="registration-side-guidance">
+            <i data-lucide="info" aria-hidden="true"></i>
+            <p>
+              Este registro será salvo no banco local.
+              <strong>A pontuação do seu dia não será alterada.</strong>
+            </p>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    {{ registration_summary() }}
+
+    <div class="watch-modal-backdrop" data-watch-modal hidden>
+      <section class="watch-modal card" role="dialog" aria-modal="true" aria-labelledby="watch-modal-title" tabindex="-1">
+        <header>
+          <div>
+            <p class="card-label">Health Connect</p>
+            <h2 id="watch-modal-title" data-watch-title>Dados do relógio</h2>
+          </div>
+          <button class="icon-button" type="button" data-close-watch aria-label="Fechar">
+            <i data-lucide="x" aria-hidden="true"></i>
+          </button>
+        </header>
+        <p data-watch-guidance>Selecione um registro importado para completar.</p>
+        <div class="watch-record-list" data-watch-records></div>
+        <p class="registration-error" data-watch-error hidden></p>
+      </section>
+    </div>
+  </div>
+{% endblock %}
+
+{% block page_scripts %}
+  <script src="{{ url_for('static', filename='js/register.js') }}"></script>
+{% endblock %}

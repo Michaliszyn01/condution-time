@@ -1,0 +1,34 @@
+{% macro registration_duration_fields(prefix, label="Duração", default_hours=0, default_minutes=0) %}
+  <fieldset class="registration-fieldset registration-duration" aria-describedby="{{ prefix }}-duration-error">
+    <legend>{{ label }}</legend>
+    <div class="registration-duration-grid">
+      <label>
+        <span>Horas</span>
+        <input
+          name="{{ prefix }}_hours"
+          type="number"
+          min="0"
+          max="24"
+          inputmode="numeric"
+          value="{{ default_hours }}"
+          data-duration-hours
+        >
+      </label>
+      <label>
+        <span>Minutos</span>
+        <input
+          name="{{ prefix }}_minutes"
+          type="number"
+          min="0"
+          max="59"
+          inputmode="numeric"
+          value="{{ default_minutes }}"
+          data-duration-minutes
+        >
+      </label>
+    </div>
+    <p class="registration-error" id="{{ prefix }}-duration-error" data-duration-error hidden>
+      Informe uma duração maior que zero.
+    </p>
+  </fieldset>
+{% endmacro %}

@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% from "components/empty_state.html" import empty_state %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+  <section class="placeholder-page" aria-label="{{ page_title }}">
+    {{ empty_state(
+      "Estrutura preparada",
+      "Esta tela permanece propositalmente vazia nesta primeira etapa.",
+      icon
+    ) }}
+  </section>
+{% endblock %}

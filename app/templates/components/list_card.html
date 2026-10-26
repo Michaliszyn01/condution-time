@@ -1,0 +1,51 @@
+{% from "components/icon_badge.html" import icon_badge %}
+
+{% macro list_card(
+  title,
+  items,
+  link_label,
+  class_name="",
+  link_href="#",
+  empty=none
+) %}
+  <article class="card list-card {{ class_name }}">
+    <header class="section-card-header">
+      <div>
+        <p class="card-label">Resumo do dia</p>
+        <h2 class="card-title">{{ title }}</h2>
+      </div>
+    </header>
+
+    <ul class="detail-list">
+      {% for item in items %}
+        <li class="detail-list-item">
+          {{ icon_badge(item.icon, item.theme) }}
+          <div class="detail-list-copy">
+            <strong>{{ item.name }}</strong>
+            <span>{{ item.meta }}</span>
+            {% if item.details %}
+              <span class="detail-list-metrics">{{ item.details|join(" • ") }}</span>
+            {% endif %}
+          </div>
+          {% if item.action_href %}
+            <a class="button button--secondary detail-list-action" href="{{ item.action_href }}">{{ item.value }}</a>
+          {% else %}
+            <strong class="detail-list-value">{{ item.value }}</strong>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+
+    {% if not items and empty %}
+      <div class="study-inline-empty">
+        <strong>{{ empty.title }}</strong>
+        <p>{{ empty.description }}</p>
+      </div>
+    {% endif %}
+
+    <a class="card-link" href="{{ empty.link_href if not items and empty else link_href }}">
+      {{ empty.link_label if not items and empty else link_label }}
+      <i data-lucide="arrow-right" aria-hidden="true"></i>
+    </a>
+  </article>
+{% endmacro %}

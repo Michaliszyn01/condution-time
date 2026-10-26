@@ -1,0 +1,34 @@
+{% from "components/icon_badge.html" import icon_badge %}
+{% from "components/badge.html" import badge %}
+
+{% macro activity_list_card(title, items, link_label, class_name="") %}
+  <article class="card computer-activity-card {{ class_name }}">
+    <header class="section-card-header">
+      <div>
+        <p class="card-label">Resumo do dia</p>
+        <h2 class="card-title">{{ title }}</h2>
+      </div>
+    </header>
+
+    <ul class="computer-activity-list">
+      {% for item in items %}
+        <li class="computer-activity-row">
+          {{ icon_badge(item.icon, item.theme) }}
+          <div class="computer-activity-copy">
+            <strong>{{ item.name }}</strong>
+            <span>{{ item.meta }}</span>
+          </div>
+          <div class="computer-activity-meta">
+            <strong>{{ item.value }}</strong>
+            {{ badge(item.status, item.status_tone) }}
+          </div>
+        </li>
+      {% endfor %}
+    </ul>
+
+    <a class="card-link" href="#">
+      {{ link_label }}
+      <i data-lucide="arrow-right" aria-hidden="true"></i>
+    </a>
+  </article>
+{% endmacro %}

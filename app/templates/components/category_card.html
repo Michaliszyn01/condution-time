@@ -1,0 +1,43 @@
+{% from "components/icon_badge.html" import icon_badge %}
+{% from "components/progress_bar.html" import progress_bar %}
+
+{% macro category_card(category, href) %}
+  <a
+    class="category-card category-card--{{ category.theme }}"
+    href="{{ href }}"
+    aria-label="{{ category.name }}: {% if category.evaluated %}{{ category.score }} de {{ category.max_score }} pontos{% else %}ainda não avaliada hoje{% endif %}"
+  >
+    <div class="category-card-top">
+      {{ icon_badge(category.icon, category.theme) }}
+      <i class="category-arrow" data-lucide="arrow-up-right" aria-hidden="true"></i>
+    </div>
+
+    <div class="category-card-body">
+      <div class="category-score-row">
+        <h3>{{ category.name }}</h3>
+        <strong>
+          {{ category.display_score|default(category.score) }}
+          <span>/ {{ category.max_score }}</span>
+        </strong>
+      </div>
+
+      {{ progress_bar(
+        category.percentage|default(category.score),
+        100 if category.percentage is defined else category.max_score,
+        category.theme,
+        "Pontuação de " ~ category.name
+      ) }}
+
+      <p class="category-status">
+        <span aria-hidden="true"></span>
+        {{ category.status }}
+      </p>
+      {% if category.warning %}
+        <p class="category-warning">
+          <i data-lucide="triangle-alert" aria-hidden="true"></i>
+          {{ category.warning }}
+        </p>
+      {% endif %}
+    </div>
+  </a>
+{% endmacro %}

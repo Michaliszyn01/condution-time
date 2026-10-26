@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% from "components/category_dashboard.html" import category_dashboard %}
+
+{% block title %}Alimentação{% endblock %}
+
+{% block page_styles %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/study.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/category-themes.css') }}">
+{% endblock %}
+
+{% block content %}
+  {{ category_dashboard(
+    nutrition_data,
+    "green",
+    "Painel de alimentação",
+    url_for("main.sessao")
+  ) }}
+{% endblock %}
+
+{% block page_scripts %}
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <script src="{{ url_for('static', filename='js/study.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/category-theme.js') }}"></script>
+{% endblock %}

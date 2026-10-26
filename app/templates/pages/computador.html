@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% from "components/computer_dashboard.html" import computer_dashboard %}
+{% from "components/date_navigation.html" import render_date_navigation %}
+
+{% block title %}Uso do computador{% endblock %}
+
+{% block page_styles %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/study.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/category-themes.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/computer.css') }}">
+{% endblock %}
+
+{% block content %}
+  {{ render_date_navigation(date_navigation) }}
+  {{ computer_dashboard(computer_data) }}
+{% endblock %}
+
+{% block page_scripts %}
+  <script src="{{ url_for('static', filename='js/computer.js') }}"></script>
+{% endblock %}

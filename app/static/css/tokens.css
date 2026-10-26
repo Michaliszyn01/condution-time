@@ -1,0 +1,42 @@
+:root {
+  --page-background: #f6f8fc;
+  --surface-primary: #ffffff;
+  --surface-secondary: #f9fbff;
+
+  --text-primary: #101828;
+  --text-secondary: #667085;
+  --text-muted: #98a2b3;
+
+  --border-soft: #e8edf5;
+
+  --accent-blue: #246bfd;
+  --accent-blue-hover: #175cd3;
+  --accent-blue-soft: #edf4ff;
+
+  --positive: #22b573;
+  --positive-soft: #eaf9f1;
+
+  --purple: #7657f6;
+  --purple-soft: #f1edff;
+
+  --orange: #ff8a34;
+  --orange-soft: #fff2e8;
+
+  --danger: #ef5b6c;
+
+  --radius-small: 12px;
+  --radius-medium: 18px;
+  --radius-large: 22px;
+
+  --shadow-card:
+    0 1px 2px rgba(16, 24, 40, 0.03),
+    0 8px 28px rgba(16, 24, 40, 0.06);
+
+  --sidebar-width: 236px;
+  --content-max-width: 1560px;
+  --content-padding: 32px;
+  --grid-gap: 20px;
+  --card-padding: 24px;
+  --transition-fast: 180ms ease;
+}
+
